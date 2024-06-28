@@ -5,6 +5,7 @@
 #### 백 기술
 - Spring Security, JPA, Hibernates, Docker, API Gateway, Kubernetes, Kafka, JUnit 및 Mockito, Prometheus 및 Grafana, Mysql, swagger
 
+
 #### 서버 AWS
 - 프론트 ECS: Nginx on docker
 - 백 ECS: springboot on docker
