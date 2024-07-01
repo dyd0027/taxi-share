@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taxi-share-back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taxi-share-back
+  template:
+    metadata:
+      labels:
+        app: taxi-share-back
+    spec:
+      containers:
+        - name: taxi-share-back
+          image: taxi-share-back-image
+          ports:
+            - containerPort: 8080
