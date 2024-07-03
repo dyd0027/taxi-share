@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: back
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/triple
+    username: triple
+    password: triple
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  docker:
+    compose:
+      enabled: false
+
+  doc:
+    api-docs:
+      path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    prometheus:
+      enabled: true
