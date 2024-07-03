@@ -23,8 +23,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults())  // HTTP Basic 인증 사용
-                .csrf().disable();  // CSRF 비활성화 (API에서는 보통 비활성화)
+                .httpBasic(withDefaults());  // HTTP Basic 인증 사용
+                //.csrf().disable();  // CSRF 비활성화 (API에서는 보통 비활성화)
 
         return http.build();
     }
