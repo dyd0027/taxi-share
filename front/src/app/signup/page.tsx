@@ -1,7 +1,11 @@
 'use client';
 
-import RegisterForm from '../../components/RegisterForm';
+import dynamic from 'next/dynamic';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const RegisterForm = dynamic(() => import('../../components/RegisterForm'), {
+  ssr: false,
+});
 
 const queryClient = new QueryClient();
 
