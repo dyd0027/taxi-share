@@ -42,7 +42,7 @@ const RegisterForm = () => {
   const mutation = useMutation<FormData, Error, FormData>({
     mutationFn: registerUser,
     onSuccess: () => {
-      router.push('/success'); // 회원가입 성공 시 리다이렉트
+      router.push('/sample'); // 회원가입 성공 시 리다이렉트
     },
     onError: (error: Error) => {
       console.error('회원가입 실패:', error);
@@ -105,6 +105,7 @@ const RegisterForm = () => {
         value={formData.userSex}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
+        aria-label="userSex"
       >
         <option value="M">남성</option>
         <option value="F">여성</option>
