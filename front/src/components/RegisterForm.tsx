@@ -1,32 +1,10 @@
+// src/components/RegisterForm.tsx
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-
-interface FormData {
-  userId: string;
-  userPassword: string;
-  userName: string;
-  phoneNum: string;
-  userSex: 'M' | 'F';
-}
-
-const registerUser = async (formData: FormData): Promise<FormData> => {
-  const response = await fetch('/api/users/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(formData),
-  });
-
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-
-  return response.json();
-};
+import { FormData, user } from '../api/user';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -40,7 +18,7 @@ const RegisterForm = () => {
   const router = useRouter();
 
   const mutation = useMutation<FormData, Error, FormData>({
-    mutationFn: registerUser,
+    mutationFn: user,
     onSuccess: () => {
       router.push('/sample'); // 회원가입 성공 시 리다이렉트
     },
