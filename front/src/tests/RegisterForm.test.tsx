@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RegisterForm from '../components/RegisterForm';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
@@ -41,7 +41,8 @@ describe('RegisterForm', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'userSex' }), { target: { value: 'F' } });
     fireEvent.click(screen.getByRole('button', { name: '회원가입' }));
 
-    // Ensure the form submission works and redirects
-    expect(push).toHaveBeenCalledWith('/sample');
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith('/sample');
+    });
   });
 });
