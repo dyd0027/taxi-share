@@ -5,6 +5,7 @@ export interface FormData {
     userName: string;
     phoneNum: string;
     userSex: 'M' | 'F';
+    userType: number;
 }
 
 export const user = async (formData: FormData): Promise<FormData> => {
