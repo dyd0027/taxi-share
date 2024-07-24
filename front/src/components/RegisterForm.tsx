@@ -13,6 +13,7 @@ const RegisterForm = () => {
     userName: '',
     phoneNum: '',
     userSex: 'M',
+    userType: 1,
   });
 
   const router = useRouter();
@@ -28,10 +29,16 @@ const RegisterForm = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    const numericFields = ['userType']; // 숫자형으로 변환해야 할 필드 목록
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: numericFields.includes(name) ? Number(value) : value,
     });
+
+    
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -87,6 +94,16 @@ const RegisterForm = () => {
       >
         <option value="M">남성</option>
         <option value="F">여성</option>
+      </select>
+      <select
+        name="userType"
+        value={formData.userType}
+        onChange={handleChange}
+        className="border p-2 w-full mb-4"
+        aria-label="userType"
+      >
+        <option value={1}>이용자</option>
+        <option value={2}>운전자</option>
       </select>
       <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">
         회원가입
