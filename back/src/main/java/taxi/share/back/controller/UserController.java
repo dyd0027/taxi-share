@@ -18,4 +18,13 @@ public class UserController {
         User registeredUser = userService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestParam String userId, @RequestParam String password) {
+        try {
+            String token = userService.login(userId, password);
+            return ResponseEntity.ok(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+        }
+    }
 }
