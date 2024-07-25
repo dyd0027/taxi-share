@@ -14,7 +14,7 @@ const LoginForm = () => {
 
   const router = useRouter();
 
-  const mutation = useMutation<LoginFormData, Error, LoginFormData>({
+  const mutation = useMutation<LoginFormData, Error, any>({
     mutationFn: login,
     onSuccess: () => {
       router.push('/sample'); // 회원가입 성공 시 리다이렉트
