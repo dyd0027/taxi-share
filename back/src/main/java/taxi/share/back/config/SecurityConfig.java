@@ -19,8 +19,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**")
+                        .requestMatchers("/api/**", "/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
@@ -33,8 +34,8 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails user = User.builder()
-                .username("your_username")
-                .password(passwordEncoder.encode("your_password"))
+                .username("123")
+                .password(passwordEncoder.encode("123"))
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
