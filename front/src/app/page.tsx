@@ -11,6 +11,11 @@ export default function Home() {
                     Go to Signup
                 </span>
             </Link>
+            <Link href="/login">
+                <span className="text-blue-500 underline hover:text-blue-700">
+                    Go to Login
+                </span>
+            </Link>
         </div>
     </main>
   );
