@@ -21,10 +21,10 @@ public class UserController {
         return ResponseEntity.ok(registeredUser);
     }
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String userId, @RequestParam String userPassword) {
-        log.info(userId);
+    public ResponseEntity<?> login(@RequestBody User user) {
+        log.info(user.getUserId());
         try {
-            String token = userService.login(userId, userPassword);
+            String token = userService.login(user.getUserId(), user.getUserPassword());
             log.info(token);
             return ResponseEntity.ok(token);
         } catch (Exception e) {
