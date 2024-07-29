@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import taxi.share.back.model.User;
 import taxi.share.back.service.UserService;
+import taxi.share.back.util.JwtUtil;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Slf4j // log
 @RestController
@@ -14,6 +17,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
@@ -25,7 +30,7 @@ public class UserController {
         log.info(user.getUserId());
         try {
             String token = userService.login(user.getUserId(), user.getUserPassword());
-            log.info(token);
+//            jwtUtil.addTokenToCookie(token, response);
             return ResponseEntity.ok(token);
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
