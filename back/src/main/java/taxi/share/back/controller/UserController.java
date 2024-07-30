@@ -8,31 +8,37 @@ import taxi.share.back.model.User;
 import taxi.share.back.service.UserService;
 import taxi.share.back.util.JwtUtil;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
-@Slf4j // log
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
+
     @Autowired
-    private UserService userService;
-    @Autowired
-    private JwtUtil jwtUtil;
+    public UserController(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         User registeredUser = userService.registerUser(user);
         return ResponseEntity.ok(registeredUser);
     }
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
-        log.info(user.getUserId());
+    public ResponseEntity<?> login(@RequestBody User user, HttpServletResponse response) {
+        log.info("Login attempt for user: {}", user.getUserId());
         try {
             String token = userService.login(user.getUserId(), user.getUserPassword());
-//            jwtUtil.addTokenToCookie(token, response);
+            jwtUtil.addTokenToCookie(token, response);
             return ResponseEntity.ok(token);
         } catch (Exception e) {
+            log.error("Login error: {}", e.getMessage());
             return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
         }
     }
