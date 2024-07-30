@@ -24,11 +24,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public String login(String userId, String password) throws Exception {
+    public User login(String userId, String password) throws Exception {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new Exception("User not found"));
         if (passwordEncoder.matches(password, user.getUserPassword())) {
-            return jwtUtil.generateToken(userId);
+            return user;
         } else {
             throw new Exception("Invalid credentials");
         }

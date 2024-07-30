@@ -31,15 +31,15 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user, HttpServletResponse response) {
+    public ResponseEntity<User> login(@RequestBody User user, HttpServletResponse response) {
         log.info("Login attempt for user: {}", user.getUserId());
         try {
-            String token = userService.login(user.getUserId(), user.getUserPassword());
-            jwtUtil.addTokenToCookie(token, response);
-            return ResponseEntity.ok(token);
+            User valiedUser = userService.login(user.getUserId(), user.getUserPassword());
+            jwtUtil.addTokenToCookie(jwtUtil.generateToken(valiedUser.getUserId()), response);
+            return ResponseEntity.ok(valiedUser);
         } catch (Exception e) {
             log.error("Login error: {}", e.getMessage());
-            return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+            return ResponseEntity.status(401).body(null);
         }
     }
 }
