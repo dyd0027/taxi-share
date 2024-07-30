@@ -33,9 +33,9 @@ public class JwtUtil {
     public void addTokenToCookie(String token, HttpServletResponse response) {
         Cookie cookie = new Cookie("jwt-token", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
-        cookie.setMaxAge((int) (EXPIRATION_TIME / 1000)); // Convert milliseconds to seconds
+        cookie.setMaxAge((int) (EXPIRATION_TIME)); // Convert milliseconds to seconds
         response.addCookie(cookie);
     }
     public String extractUsername(String token) {
