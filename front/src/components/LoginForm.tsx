@@ -7,17 +7,17 @@ import { useMutation } from '@tanstack/react-query';
 import { FormData, LoginFormData, login } from '../api/user';
 
 const LoginForm = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
+  const [loginFormData, setLoginFormData] = useState<LoginFormData>({
     userId: '',
     userPassword: '',
   });
 
   const router = useRouter();
 
-  const mutation = useMutation<LoginFormData, Error, any>({
+  const mutation = useMutation<FormData, Error, LoginFormData>({
     mutationFn: login,
     onSuccess: () => {
-      router.push('/sample'); // 회원가입 성공 시 리다이렉트
+      router.push('/'); // 회원가입 성공 시 리다이렉트
     },
     onError: (error: Error) => {
       console.error('로그인 실패:', error);
@@ -27,8 +27,8 @@ const LoginForm = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    setFormData({
-      ...formData,
+    setLoginFormData({
+      ...loginFormData,
       [name]: value,
     });
 
@@ -37,7 +37,7 @@ const LoginForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(formData);
+    mutation.mutate(loginFormData);
   };
 
   return (
@@ -47,7 +47,7 @@ const LoginForm = () => {
         type="text"
         name="userId"
         placeholder="아이디"
-        value={formData.userId}
+        value={loginFormData.userId}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         required
@@ -56,7 +56,7 @@ const LoginForm = () => {
         type="password"
         name="userPassword"
         placeholder="비밀번호"
-        value={formData.userPassword}
+        value={loginFormData.userPassword}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         required

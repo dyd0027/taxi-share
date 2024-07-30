@@ -24,7 +24,7 @@ export const user = async (formData: FormData): Promise<FormData> => {
   return response.data;
 };
 
-export const login = async (loginFormData: LoginFormData): Promise<any> => {
+export const login = async (loginFormData: LoginFormData): Promise<FormData> => {
   try {
     // param으로 보낼 때
     // const params = new URLSearchParams();
