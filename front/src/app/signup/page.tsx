@@ -7,15 +7,15 @@ const RegisterForm = dynamic(() => import('../../components/RegisterForm'), {
   ssr: false,
 });
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
 const RegisterPage = () => {
   return (
-    <QueryClientProvider client={queryClient}>
+    // <QueryClientProvider client={queryClient}>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <RegisterForm />
       </div>
-    </QueryClientProvider>
+    // </QueryClientProvider>
   );
 };
 

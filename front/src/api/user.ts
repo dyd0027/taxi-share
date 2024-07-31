@@ -41,7 +41,6 @@ export const login = async (loginFormData: LoginFormData): Promise<FormData> => 
             'Content-Type': 'application/json',
         },
     });
-    console.log('Login response data:', response.data);
     return response.data;
   } catch (error: any) {
       if (error.response) {

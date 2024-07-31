@@ -7,15 +7,15 @@ const LoginForm = dynamic(() => import('../../components/LoginForm'), {
   ssr: false,
 });
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
 const LoginPage = () => {
   return (
-    <QueryClientProvider client={queryClient}>
+    // <QueryClientProvider client={queryClient}>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <LoginForm />
       </div>
-    </QueryClientProvider>
+    // </QueryClientProvider>
   );
 };
 

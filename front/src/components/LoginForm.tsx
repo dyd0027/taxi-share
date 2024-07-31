@@ -19,8 +19,8 @@ const LoginForm = () => {
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data);
       const users = queryClient.getQueryData<FormData>(['user']);
-      console.log(users);
-      router.push('/'); // 회원가입 성공 시 리다이렉트
+      console.log('여기는 됨 >>>> ', users);
+      router.push('/sample'); // 회원가입 성공 시 리다이렉트
     },
     onError: (error: Error) => {
       console.error('로그인 실패:', error);
