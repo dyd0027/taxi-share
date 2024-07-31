@@ -1,11 +1,7 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
-import dynamic from 'next/dynamic';
 import "./globals.css";
 import QueryProvider from './QueryProvider';
-// const QueryProvider = dynamic(() => import('./QueryProvider'), {
-//   ssr: false,
-// });
-
 
 export const metadata: Metadata = {
   title: "Create Next App",

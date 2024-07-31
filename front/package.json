@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.45.1",
+    "@tanstack/react-query-devtools": "^5.51.16",
     "axios": "^1.7.2",
     "cookie": "^0.6.0",
     "jsonwebtoken": "^9.0.2",

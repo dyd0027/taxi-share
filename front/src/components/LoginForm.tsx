@@ -20,7 +20,7 @@ const LoginForm = () => {
       queryClient.setQueryData(['user'], data);
       const users = queryClient.getQueryData<FormData>(['user']);
       console.log('여기는 됨 >>>> ', users);
-      router.push('/sample'); // 회원가입 성공 시 리다이렉트
+      router.push('/'); // 회원가입 성공 시 리다이렉트
     },
     onError: (error: Error) => {
       console.error('로그인 실패:', error);
@@ -29,13 +29,10 @@ const LoginForm = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
     setLoginFormData({
       ...loginFormData,
       [name]: value,
     });
-
-    
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,7 +61,6 @@ const LoginForm = () => {
         className="border p-2 w-full mb-4"
         required
       />
-      
       <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">
         로그인
       </button>
