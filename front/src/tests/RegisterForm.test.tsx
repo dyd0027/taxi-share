@@ -42,7 +42,7 @@ describe('RegisterForm', () => {
     fireEvent.click(screen.getByRole('button', { name: '회원가입' }));
 
     await waitFor(() => {
-      expect(push).toHaveBeenCalledWith('/sample');
+      expect(push).toHaveBeenCalledWith('/');
     });
   });
 });

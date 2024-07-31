@@ -3,20 +3,20 @@
 import dynamic from 'next/dynamic';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const RegisterForm = dynamic(() => import('../../components/RegisterForm'), {
+const LoginForm = dynamic(() => import('../../components/LoginForm'), {
   ssr: false,
 });
 
 // const queryClient = new QueryClient();
 
-const RegisterPage = () => {
+const LoginPage = () => {
   return (
     // <QueryClientProvider client={queryClient}>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <RegisterForm />
+        <LoginForm />
       </div>
     // </QueryClientProvider>
   );
 };
 
-export default RegisterPage;
+export default LoginPage;
