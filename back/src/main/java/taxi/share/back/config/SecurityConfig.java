@@ -12,8 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -21,24 +19,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/**", "/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
                 )
-                .httpBasic(withDefaults())  // HTTP Basic 인증 사용
-                .csrf().disable();  // CSRF 비활성화 (API에서는 보통 비활성화)
-
+                .formLogin(form -> form.defaultSuccessUrl("/swagger-ui.html", true))
+                .httpBasic(withDefaults -> {});
         return http.build();
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("your_username")
-                .password("your_password")
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails user = User.builder()
+                .username("123")
+                .password(passwordEncoder.encode("123"))
                 .roles("USER")
                 .build();
-
         return new InMemoryUserDetailsManager(user);
     }
 

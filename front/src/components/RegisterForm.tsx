@@ -21,7 +21,7 @@ const RegisterForm = () => {
   const mutation = useMutation<FormData, Error, FormData>({
     mutationFn: user,
     onSuccess: () => {
-      router.push('/sample'); // 회원가입 성공 시 리다이렉트
+      router.push('/'); // 회원가입 성공 시 리다이렉트
     },
     onError: (error: Error) => {
       console.error('회원가입 실패:', error);
