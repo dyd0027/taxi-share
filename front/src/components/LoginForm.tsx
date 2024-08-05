@@ -4,7 +4,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FormData, LoginFormData, login } from '../api/user';
+import { login } from '../api/user';
+import { FormData } from '@/types/formData';
+import { LoginFormData } from '@/types/loginFormData';
 
 const LoginForm = () => {
   const [loginFormData, setLoginFormData] = useState<LoginFormData>({
@@ -19,7 +21,6 @@ const LoginForm = () => {
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data);
       const users = queryClient.getQueryData<FormData>(['user']);
-      console.log('여기는 됨 >>>> ', users);
       router.push('/'); // 회원가입 성공 시 리다이렉트
     },
     onError: (error: Error) => {
