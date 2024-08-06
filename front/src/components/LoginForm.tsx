@@ -3,10 +3,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { login } from '../api/user';
 import { FormData } from '@/types/formData';
 import { LoginFormData } from '@/types/loginFormData';
+import useUserStore from '@/store/useUserStore';
 
 const LoginForm = () => {
   const [loginFormData, setLoginFormData] = useState<LoginFormData>({
@@ -15,12 +16,11 @@ const LoginForm = () => {
   });
 
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const setUserStore = useUserStore((state) => state.setUser);
   const mutation = useMutation<FormData, Error, LoginFormData>({
     mutationFn: login,
     onSuccess: (data) => {
-      queryClient.setQueryData(['user'], data);
-      const users = queryClient.getQueryData<FormData>(['user']);
+      setUserStore(data);
       router.push('/'); // 회원가입 성공 시 리다이렉트
     },
     onError: (error: Error) => {
