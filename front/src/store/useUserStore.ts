@@ -1,6 +1,6 @@
 // src/store/useUserStore.ts
-import create, { StateCreator } from 'zustand';
-import { persist, PersistOptions } from 'zustand/middleware';
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { FormData } from '@/types/formData';
 
 interface UserStore {
@@ -9,13 +9,8 @@ interface UserStore {
   logout: () => void;
 }
 
-type MyPersist = (
-  config: StateCreator<UserStore>,
-  options: PersistOptions<UserStore>
-) => StateCreator<UserStore>;
-
-const useUserStore = create<UserStore>(
-  (persist as MyPersist)(
+const useUserStore = create<UserStore>()(
+  persist(
     (set) => ({
       user: undefined,
       setUser: (user) => set({ user }),
@@ -23,7 +18,7 @@ const useUserStore = create<UserStore>(
     }),
     {
       name: 'user-info',
-      getStorage: () => localStorage,
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );
