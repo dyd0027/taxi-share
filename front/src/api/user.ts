@@ -47,3 +47,23 @@ export const login = async (loginFormData: LoginFormData): Promise<FormData> => 
       throw error;
   }
 };
+
+export const checkSession = async (): Promise<boolean> => {
+  try {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/check-session`, {
+        withCredentials: true, // 쿠키를 포함하도록 설정
+    });
+    return response.data.isLoggedIn;
+  } catch (error: any) {
+      if (error.response) {
+          console.error('Error response:', error.response.data);
+          console.error('Error status:', error.response.status);
+          console.error('Error headers:', error.response.headers);
+      } else if (error.request) {
+          console.error('Error request:', error.request);
+      } else {
+          console.error('Error message:', error.message);
+      }
+      throw error;
+  }
+};

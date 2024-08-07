@@ -4,11 +4,12 @@
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
+import { useSession } from '@/hooks/useSession'
 
 export default function Home() {
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useUserStore((state) => state.user);
-
+  useSession();
   // 클라이언트 측에서만 실행
   useEffect(() => {
     setIsHydrated(true);
