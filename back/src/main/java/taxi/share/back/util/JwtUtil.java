@@ -2,12 +2,15 @@ package taxi.share.back.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import taxi.share.back.model.User;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -16,7 +19,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String SECRET_KEY = "taxi_share";
-    private static final long EXPIRATION_TIME = 600_000; // 10 minutes
+    private static final long EXPIRATION_TIME = 60_000; // 10 minutes
     private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
 
     public String generateToken(String userId) {
@@ -38,7 +41,7 @@ public class JwtUtil {
         cookie.setMaxAge((int) (EXPIRATION_TIME)); // Convert milliseconds to seconds
         response.addCookie(cookie);
     }
-    public String extractUsername(String token) {
+    public String extractUserId(String token) {
         return Jwts.parser()
                 .setSigningKey(Base64.encodeBase64String(SECRET_KEY.getBytes()))
                 .parseClaimsJws(token)
@@ -46,11 +49,21 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public boolean validateToken(String token, User user) {
+        final String userId = extractUserId(token);
+        return (userId.equals(user.getUserId()) && !isTokenExpired(token));
     }
-
+    public String extractTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt-token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
     private boolean isTokenExpired(String token) {
         Date expiration = Jwts.parser()
                 .setSigningKey(Base64.encodeBase64String(SECRET_KEY.getBytes()))
