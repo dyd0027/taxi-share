@@ -50,12 +50,17 @@ public class UserController {
             if (token != null) {
                 String userId = jwtUtil.extractUserId(token);
                 User user = userService.findUserByUserId(userId);
-                return ResponseEntity.ok(jwtUtil.validateToken(token, user));
+                boolean isValidated = jwtUtil.validateToken(token, user);
+                if (!isValidated) {
+                    jwtUtil.invalidateCookie(response, "jwt-token");
+                }
+                return ResponseEntity.ok(isValidated);
             } else {
-                return ResponseEntity.status(401).body(null);
+                return ResponseEntity.ok(false);
             }
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(null);
+            log.error(e.getMessage());
+            return ResponseEntity.ok(false);
         }
     }
 }
