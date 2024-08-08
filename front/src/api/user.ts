@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { FormData } from '@/types/formData';
 import { LoginFormData } from '@/types/loginFormData';
-
+axios.defaults.withCredentials = true;
 // axios같은 경우 fetch보다 좀 더 유연하게 백엔드와의 통신을 할 수 있어서 axios를 많이 사용 함.
 export const user = async (formData: FormData): Promise<FormData> => {
   const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/register`, formData, {
@@ -53,7 +53,7 @@ export const checkSession = async (): Promise<boolean> => {
     const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/check-session`, {
         withCredentials: true, // 쿠키를 포함하도록 설정
     });
-    return response.data.isLoggedIn;
+    return response.data;
   } catch (error: any) {
       if (error.response) {
           console.error('Error response:', error.response.data);
