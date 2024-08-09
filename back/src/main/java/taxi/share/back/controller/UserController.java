@@ -1,5 +1,6 @@
 package taxi.share.back.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,26 @@ public class UserController {
         } catch (Exception e) {
             log.error("Login error: {}", e.getMessage());
             return ResponseEntity.status(401).body(null);
+        }
+    }
+    @GetMapping("/check-session")
+    public ResponseEntity<Boolean> sessionCheck(HttpServletRequest request, HttpServletResponse response) {
+        String token = jwtUtil.extractTokenFromCookie(request);
+        try {
+            if (token != null) {
+                String userId = jwtUtil.extractUserId(token);
+                User user = userService.findUserByUserId(userId);
+                boolean isValidated = jwtUtil.validateToken(token, user);
+                if (!isValidated) {
+                    jwtUtil.invalidateCookie(response, "jwt-token");
+                }
+                return ResponseEntity.ok(isValidated);
+            } else {
+                return ResponseEntity.ok(false);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.ok(false);
         }
     }
 }
