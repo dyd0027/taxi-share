@@ -2,23 +2,22 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import Link from "next/link";
-import { FormData } from '../api/user';
+import useUserStore from '@/store/useUserStore';
+import { useSession } from '@/hooks/useSession'
 
 export default function Home() {
-  const queryClient = useQueryClient();
-  const [user, setUser] = useState<FormData | undefined>(undefined);
-
+  const [isHydrated, setIsHydrated] = useState(false);
+  const user = useUserStore((state) => state.user);
+  useSession();
+  // 클라이언트 측에서만 실행
   useEffect(() => {
-    const fetchUser = async () => {
-      const userData = queryClient.getQueryData<FormData>(['user']);
-      console.log("user >>>>> ", userData);
-      setUser(userData);
-    };
+    setIsHydrated(true);
+  }, []);
 
-    fetchUser();
-  }, [queryClient]); // queryClient가 변경될 때마다 fetchUser를 호출
+  if (!isHydrated) {
+    return null; // 클라이언트 측에서 초기화될 때까지 아무것도 렌더링하지 않음
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

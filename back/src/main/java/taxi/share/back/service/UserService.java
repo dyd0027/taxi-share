@@ -16,9 +16,6 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
     public User registerUser(User user) {
         user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
         return userRepository.save(user);
@@ -32,5 +29,10 @@ public class UserService {
         } else {
             throw new Exception("Invalid credentials");
         }
+    }
+
+    public User findUserByUserId(String userId) throws Exception {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new Exception("User not found"));
     }
 }

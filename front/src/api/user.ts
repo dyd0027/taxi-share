@@ -1,19 +1,8 @@
 // src/api/user.ts
 import axios from 'axios';
-
-export interface FormData {
-    userId: string;
-    userPassword: string;
-    userName: string;
-    phoneNum: string;
-    userSex: 'M' | 'F';
-    userType: number;
-}
-export interface LoginFormData {
-  userId: string;
-  userPassword: string;
-}
-
+import { FormData } from '@/types/formData';
+import { LoginFormData } from '@/types/loginFormData';
+axios.defaults.withCredentials = true;
 // axios같은 경우 fetch보다 좀 더 유연하게 백엔드와의 통신을 할 수 있어서 axios를 많이 사용 함.
 export const user = async (formData: FormData): Promise<FormData> => {
   const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/register`, formData, {
@@ -53,6 +42,26 @@ export const login = async (loginFormData: LoginFormData): Promise<FormData> => 
           console.error('Error request:', error.request);
       } else {
           // 요청 설정 중에 발생한 에러
+          console.error('Error message:', error.message);
+      }
+      throw error;
+  }
+};
+
+export const checkSession = async (): Promise<boolean> => {
+  try {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/check-session`, {
+        withCredentials: true, // 쿠키를 포함하도록 설정
+    });
+    return response.data;
+  } catch (error: any) {
+      if (error.response) {
+          console.error('Error response:', error.response.data);
+          console.error('Error status:', error.response.status);
+          console.error('Error headers:', error.response.headers);
+      } else if (error.request) {
+          console.error('Error request:', error.request);
+      } else {
           console.error('Error message:', error.message);
       }
       throw error;
