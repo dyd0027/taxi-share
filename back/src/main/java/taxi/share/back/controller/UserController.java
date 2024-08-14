@@ -35,8 +35,7 @@ public class UserController {
     public ResponseEntity<User> login(@RequestBody User user, HttpServletResponse response) {
         log.info("Login attempt for user: {}", user.getUserId());
         try {
-            User valiedUser = userService.login(user.getUserId(), user.getUserPassword());
-            jwtUtil.addTokenToCookie(jwtUtil.generateToken(valiedUser.getUserId()), response);
+            User valiedUser = userService.login(user.getUserId(), user.getUserPassword(), response);
             return ResponseEntity.ok(valiedUser);
         } catch (Exception e) {
             log.error("Login error: {}", e.getMessage());
@@ -46,20 +45,13 @@ public class UserController {
     @GetMapping("/check-session")
     public ResponseEntity<Boolean> sessionCheck(HttpServletRequest request, HttpServletResponse response) {
         String token = jwtUtil.extractTokenFromCookie(request);
-        try {
-            if (token != null) {
-                String userId = jwtUtil.extractUserId(token);
-                User user = userService.findUserByUserId(userId);
-                boolean isValidated = jwtUtil.validateToken(token, user);
-                if (!isValidated) {
-                    jwtUtil.invalidateCookie(response, "jwt-token");
-                }
-                return ResponseEntity.ok(isValidated);
-            } else {
-                return ResponseEntity.ok(false);
+        if (token != null) {
+            boolean isValidated = userService.validateToken(token);
+            if (!isValidated) {
+                jwtUtil.invalidateCookie(response, "jwt-token");
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
+            return ResponseEntity.ok(isValidated);
+        } else {
             return ResponseEntity.ok(false);
         }
     }

@@ -1,5 +1,7 @@
 package taxi.share.back.util;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,11 +46,18 @@ public class JwtUtil {
         response.addCookie(cookie);
     }
     public String extractUserId(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY.getBytes())
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            // JWT를 파싱하여 내용(Claims)을 추출
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY.getBytes())
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            // 토큰이 만료된 경우에도 Claims를 가져옴
+            Claims claims = e.getClaims();
+            return claims.getSubject();
+        }
     }
 
     public boolean validateToken(String token, User user) {
