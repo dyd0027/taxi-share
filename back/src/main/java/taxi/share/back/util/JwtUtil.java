@@ -5,25 +5,33 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import taxi.share.back.model.User;
+import taxi.share.back.repository.UserRepository;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
-
+@Slf4j
 @Component
 public class JwtUtil {
-
+    private final RedisTemplate<String, Object> redisTemplate;
     private static final String SECRET_KEY = "taxi_share";
     private static final long EXPIRATION_TIME = 1_000; // 10 minutes
     private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
-
+    @Autowired
+    public JwtUtil(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
     public String generateToken(String userId) {
         ZonedDateTime now = ZonedDateTime.now(KST_ZONE_ID);
         ZonedDateTime expirationTime = now.plusMinutes(1);
@@ -45,25 +53,24 @@ public class JwtUtil {
 //        cookie.setDomain("localhost");
         response.addCookie(cookie);
     }
-    public String extractUserId(String token) {
+    public boolean validateToken(String token, HttpServletResponse response) {
         try {
             // JWT를 파싱하여 내용(Claims)을 추출
-            Claims claims = Jwts.parser()
+            Jwts.parser()
                     .setSigningKey(SECRET_KEY.getBytes())
                     .parseClaimsJws(token)
                     .getBody();
-            return claims.getSubject();
+            return true;
         } catch (ExpiredJwtException e) {
             // 토큰이 만료된 경우에도 Claims를 가져옴
-            Claims claims = e.getClaims();
-            return claims.getSubject();
+            String userId = e.getClaims().getSubject();
+            log.info("Http Cookie Session 만료 >>>>", userId);
+            redisTemplate.delete("userCache::" + userId);
+            invalidateCookie(response, "jwt-token");
+            return false;
         }
     }
 
-    public boolean validateToken(String token, User user) {
-        final String userId = extractUserId(token);
-        return (userId.equals(user.getUserId()) && !isTokenExpired(token));
-    }
     public String extractTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -74,14 +81,6 @@ public class JwtUtil {
             }
         }
         return null;
-    }
-    private boolean isTokenExpired(String token) {
-        Date expiration = Jwts.parser()
-                .setSigningKey(Base64.encodeBase64String(SECRET_KEY.getBytes()))
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
     }
     public void invalidateCookie(HttpServletResponse response, String cookieName) {
         Cookie cookie = new Cookie(cookieName, null);

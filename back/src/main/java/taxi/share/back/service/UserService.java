@@ -58,17 +58,10 @@ public class UserService {
                 .orElseThrow(() -> new Exception("User not found"));
     }
 
-    public boolean validateToken(String token) {
-        String userId = jwtUtil.extractUserId(token);
+    public boolean validateToken(String token, HttpServletResponse response) {
         try {
-            User user = findUserByUserId(userId);
-            boolean isValidated = jwtUtil.validateToken(token, user);
-            if(!isValidated) {
-                redisTemplate.delete(userId);
-            }
-            return isValidated;
+            return jwtUtil.validateToken(token, response);
         } catch (Exception e){
-            redisTemplate.delete(userId);
             log.error(e.getMessage());
             return false;
         }

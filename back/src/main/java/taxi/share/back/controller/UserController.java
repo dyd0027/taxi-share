@@ -46,7 +46,7 @@ public class UserController {
     public ResponseEntity<Boolean> sessionCheck(HttpServletRequest request, HttpServletResponse response) {
         String token = jwtUtil.extractTokenFromCookie(request);
         if (token != null) {
-            boolean isValidated = userService.validateToken(token);
+            boolean isValidated = userService.validateToken(token, response);
             if (!isValidated) {
                 jwtUtil.invalidateCookie(response, "jwt-token");
             }
