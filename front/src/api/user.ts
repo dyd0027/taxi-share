@@ -49,6 +49,7 @@ export const login = async (loginFormData: LoginFormData): Promise<FormData> => 
 };
 
 export const checkSession = async (): Promise<boolean> => {
+  // 쿠키값이 복수이면 키값을 보내는 방식으로 코드를 재구성할 필요가 있음 (추후 개발) 
   try {
     const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/check-session`, {
         withCredentials: true, // 쿠키를 포함하도록 설정
