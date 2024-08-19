@@ -33,11 +33,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User login(String userId, String password, HttpServletResponse response) throws Exception {
-        User user = findUserByUserId(userId);
-        if (passwordEncoder.matches(password, user.getUserPassword())) {
-            jwtUtil.addTokenToCookie(jwtUtil.generateToken(user.getUserId()), response);
-            return user;
+    public User login(User dbUser, String password, HttpServletResponse response) throws Exception {
+        if (passwordEncoder.matches(password, dbUser.getUserPassword())) {
+            jwtUtil.addTokenToCookie(jwtUtil.generateToken(dbUser.getUserId()), response);
+            return dbUser;
         } else {
             throw new Exception("Invalid credentials");
         }
