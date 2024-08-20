@@ -35,7 +35,8 @@ public class UserController {
     public ResponseEntity<User> login(@RequestBody User user, HttpServletResponse response) {
         log.info("Login attempt for user: {}", user.getUserId());
         try {
-            User valiedUser = userService.login(user.getUserId(), user.getUserPassword(), response);
+            User dbUser = userService.findUserByUserId(user.getUserId());
+            User valiedUser = userService.login(dbUser, user.getUserPassword(), response);
             return ResponseEntity.ok(valiedUser);
         } catch (Exception e) {
             log.error("Login error: {}", e.getMessage());
@@ -43,8 +44,8 @@ public class UserController {
         }
     }
     @GetMapping("/check-session")
-    public ResponseEntity<Boolean> sessionCheck(HttpServletRequest request, HttpServletResponse response) {
-        String token = jwtUtil.extractTokenFromCookie(request);
+    public ResponseEntity<Boolean> sessionCheck(HttpServletRequest request, HttpServletResponse response,@RequestParam(name = "cookie", required = false) String cookie) {
+        String token = jwtUtil.extractTokenFromCookie(request, cookie);
         if (token != null) {
             boolean isValidated = userService.validateToken(token, response);
             if (!isValidated) {
