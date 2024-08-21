@@ -1,16 +1,34 @@
-// src/app/page.tsx
 "use client";
 
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
-import { useSession } from '@/hooks/useSession'
+import { useSession } from '@/hooks/useSession';
+import dynamic from 'next/dynamic';
+import AddressSearch from '@/components/AddressSearch';
+
+// KakaoMap 컴포넌트를 동적으로 불러옵니다. 이때 SSR을 비활성화합니다.
+const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
+  ssr: false,
+});
 
 export default function Home() {
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useUserStore((state) => state.user);
+  const [origin, setOrigin] = useState<string | undefined>();
+  const [destination, setDestination] = useState<string | undefined>();
+  const [isSelectingOrigin, setIsSelectingOrigin] = useState<boolean>(false);
+
+  const handleSelectAddress = (address: string) => {
+    if (isSelectingOrigin) {
+      setOrigin(address);
+    } else {
+      setDestination(address);
+    }
+  };
+
   useSession();
-  // 클라이언트 측에서만 실행
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -24,7 +42,28 @@ export default function Home() {
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to the Home Page</h1>
         {user ? (
-          <p className="text-xl">Hello, {user.userName}!</p>
+          <>
+            <div>
+              <p>출발지: {origin}</p>
+              <button
+                onClick={() => setIsSelectingOrigin(true)}
+                className="bg-blue-500 text-white p-2 m-2"
+              >
+                출발지 검색
+              </button>
+            </div>
+            <div>
+              <p>도착지: {destination}</p>
+              <button
+                onClick={() => setIsSelectingOrigin(false)}
+                className="bg-blue-500 text-white p-2 m-2"
+              >
+                도착지 검색
+              </button>
+            </div>
+            <AddressSearch onSelectAddress={handleSelectAddress} />
+            <KakaoMap origin={origin} destination={destination} />
+          </>
         ) : (
           <>
             <Link href="/signup">
