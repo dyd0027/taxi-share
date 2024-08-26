@@ -1,5 +1,5 @@
 "use client";
-
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
@@ -17,16 +17,7 @@ export default function Home() {
   const user = useUserStore((state) => state.user);
   const [origin, setOrigin] = useState<string | undefined>();
   const [destination, setDestination] = useState<string | undefined>();
-  const [isSelectingOrigin, setIsSelectingOrigin] = useState<boolean>(false);
-
-  const handleSelectAddress = (address: string) => {
-    if (isSelectingOrigin) {
-      setOrigin(address);
-    } else {
-      setDestination(address);
-    }
-  };
-
+  const [route, setRoute] = useState(null);
   useSession();
 
   useEffect(() => {
@@ -36,6 +27,22 @@ export default function Home() {
   if (!isHydrated) {
     return null; // 클라이언트 측에서 초기화될 때까지 아무것도 렌더링하지 않음
   }
+  const findRoute = async () => {
+    try {
+      const response = await axios.get(`https://apis-navi.kakaomobility.com/v1/route`, {
+        headers: {
+          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}`,
+        },
+        params: {
+          origin,
+          destination,
+        },
+      });
+      setRoute(response.data);
+    } catch (error) {
+      console.error('Error fetching route:', error);
+    }
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -44,24 +51,21 @@ export default function Home() {
         {user ? (
           <>
             <div>
-              <p>출발지: {origin}</p>
-              <button
-                onClick={() => setIsSelectingOrigin(true)}
-                className="bg-blue-500 text-white p-2 m-2"
-              >
-                출발지 검색
-              </button>
+              {origin && origin}
+              <AddressSearch btn={"출발지 검색"} setPlace={setOrigin} />
             </div>
             <div>
-              <p>도착지: {destination}</p>
-              <button
-                onClick={() => setIsSelectingOrigin(false)}
-                className="bg-blue-500 text-white p-2 m-2"
-              >
-                도착지 검색
-              </button>
+              {destination && destination}
+              <AddressSearch btn={"도착지 검색"} setPlace={setDestination} />
             </div>
-            <AddressSearch onSelectAddress={handleSelectAddress} />
+            <button onClick={findRoute}>경로 찾기</button>
+
+            {route && (
+              <div>
+                <h3>경로 정보:</h3>
+                <pre>{JSON.stringify(route, null, 2)}</pre>
+              </div>
+            )}
             <KakaoMap origin={origin} destination={destination} />
           </>
         ) : (

@@ -1,41 +1,47 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface AddressSearchProps {
-  onSelectAddress: (address: string) => void;
+    btn: string;
+    setPlace: (address: string) => void;
 }
 
-const AddressSearch = ({ onSelectAddress }: AddressSearchProps) => {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
-    script.async = true;
-    document.body.appendChild(script);
+const AddressSearch = ({ btn, setPlace }: AddressSearchProps) => {
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+        script.async = true;
+        document.body.appendChild(script);
 
-    script.onload = () => {
-      const daum = (window as any).daum;
-      const postcode = new daum.Postcode({
-        oncomplete: (data: any) => {
-          onSelectAddress(data.address);
-        }
-      });
+        script.onload = () => {
+            const daum = (window as any).daum;
+            const postcode = new daum.Postcode({
+                oncomplete: (data: any) => {
+                    console.log(data.address);
+                    setPlace(data.address);
+                }
+            });
 
-      document.getElementById("search-address")?.addEventListener("click", () => {
-        postcode.open();
-      });
-    };
+            buttonRef.current?.addEventListener("click", () => {
+                postcode.open();
+            });
+        };
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, [onSelectAddress]);
+        return () => {
+            if (buttonRef.current) {
+                buttonRef.current.removeEventListener("click", () => {});
+            }
+            document.body.removeChild(script);
+        };
+    }, [setPlace]);
 
-  return (
-    <button id="search-address" className="bg-blue-500 text-white p-2 m-2">
-      주소 검색
-    </button>
-  );
+    return (
+        <button ref={buttonRef} className="bg-blue-500 text-white p-2 m-2">
+            {btn}
+        </button>
+    );
 };
 
 export default AddressSearch;
