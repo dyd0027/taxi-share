@@ -9,43 +9,27 @@ import lombok.Setter;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "USER")
+@Table(name = "ROUTES")
 @Setter
 @Getter
-@Schema(description = "Details about the user")
-public class User implements Serializable {
+@Schema(description = "Details about the route")
+public class Routes implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "The unique ID of the user", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-    private int userNo;
-
-    @Column(nullable = false, unique = true)
-    @Schema(description = "The user's ID", example = "user123")
-    private String userId;
+    @Schema(description = "The unique ID of the routes", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
+    private int routeNO;
 
     @Column(nullable = false)
-    @Schema(description = "The user's password", example = "password123")
-    private String userPassword;
+    @Schema(description = "The map's origin", example = "서울 동대문구")
+    private String origin;
 
     @Column(nullable = false)
-    @Schema(description = "The user's name", example = "John Doe")
-    private String userName;
+    @Schema(description = "The map's destination", example = "서울 서대문구")
+    private String destination;
 
-    @Column(nullable = false)
-    @Schema(description = "The user's type", example = "1")
-    private int userType;
 
-    @Column(nullable = false, unique = true)
-    @Schema(description = "The user's phone number", example = "010-1111-1111")
-    private String phoneNum;
-
-    // char가 아닌 String인 이유는 SpringBoot는 JSON 데이터를 객체로 변환할 때 char를 처리하기 힘듦.
-    @Column(nullable = false)
-    @Pattern(regexp = "[MF]", message = "Sex must be M or F")
-    @Schema(description = "The user's sex", example = "M")
-    private String userSex;
 
 
     // getters and setters
