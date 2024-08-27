@@ -1,11 +1,14 @@
 "use client";
-import axios from 'axios';
+
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
 import { useSession } from '@/hooks/useSession';
 import dynamic from 'next/dynamic';
 import AddressSearch from '@/components/AddressSearch';
+import { useMutation } from '@tanstack/react-query';
+import { route } from '@/api/map'; // 수정된 route 함수 가져오기
+import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
 
 // KakaoMap 컴포넌트를 동적으로 불러옵니다. 이때 SSR을 비활성화합니다.
 const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
@@ -17,32 +20,27 @@ export default function Home() {
   const user = useUserStore((state) => state.user);
   const [origin, setOrigin] = useState<string | undefined>();
   const [destination, setDestination] = useState<string | undefined>();
-  const [route, setRoute] = useState(null);
   useSession();
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
+  const { mutate, data: routeData, isError, error } = useMutation({
+    mutationFn: (data: RouteData) => route(data), // RouteData 객체를 전달
+  });
+
+  const handleFindRoute = () => {
+    if (origin && destination) {
+      mutate({ origin, destination }); // RouteData 객체로 전달
+    } else {
+      console.error('Origin and destination must be provided');
+    }
+  };
+
   if (!isHydrated) {
     return null; // 클라이언트 측에서 초기화될 때까지 아무것도 렌더링하지 않음
   }
-  const findRoute = async () => {
-    try {
-      const response = await axios.get(`https://apis-navi.kakaomobility.com/v1/route`, {
-        headers: {
-          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}`,
-        },
-        params: {
-          origin,
-          destination,
-        },
-      });
-      setRoute(response.data);
-    } catch (error) {
-      console.error('Error fetching route:', error);
-    }
-  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -58,12 +56,13 @@ export default function Home() {
               {destination && destination}
               <AddressSearch btn={"도착지 검색"} setPlace={setDestination} />
             </div>
-            <button onClick={findRoute}>경로 찾기</button>
+            <button onClick={handleFindRoute}>경로 찾기</button>
 
-            {route && (
+            {isError && <p>Error: {error.message}</p>}
+            {routeData && (
               <div>
                 <h3>경로 정보:</h3>
-                <pre>{JSON.stringify(route, null, 2)}</pre>
+                <pre>{JSON.stringify(routeData, null, 2)}</pre>
               </div>
             )}
             <KakaoMap origin={origin} destination={destination} />
