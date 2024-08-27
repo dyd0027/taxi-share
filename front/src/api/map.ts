@@ -6,11 +6,10 @@ axios.defaults.withCredentials = true;
 
 export const route = async (routeData: RouteData): Promise<RouteData> => {
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/route`, {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/route`, routeData, {
         headers: {
             'Content-Type': 'application/json',
-        },
-        params: routeData,
+        }
     });
     return response.data;
   } catch (error: any) {
