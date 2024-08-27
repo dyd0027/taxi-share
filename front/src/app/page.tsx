@@ -1,16 +1,25 @@
-// src/app/page.tsx
 "use client";
-
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
-import { useSession } from '@/hooks/useSession'
+import { useSession } from '@/hooks/useSession';
+import dynamic from 'next/dynamic';
+import AddressSearch from '@/components/AddressSearch';
+
+// KakaoMap 컴포넌트를 동적으로 불러옵니다. 이때 SSR을 비활성화합니다.
+const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
+  ssr: false,
+});
 
 export default function Home() {
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useUserStore((state) => state.user);
+  const [origin, setOrigin] = useState<string | undefined>();
+  const [destination, setDestination] = useState<string | undefined>();
+  const [route, setRoute] = useState(null);
   useSession();
-  // 클라이언트 측에서만 실행
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -18,13 +27,47 @@ export default function Home() {
   if (!isHydrated) {
     return null; // 클라이언트 측에서 초기화될 때까지 아무것도 렌더링하지 않음
   }
+  const findRoute = async () => {
+    try {
+      const response = await axios.get(`https://apis-navi.kakaomobility.com/v1/route`, {
+        headers: {
+          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}`,
+        },
+        params: {
+          origin,
+          destination,
+        },
+      });
+      setRoute(response.data);
+    } catch (error) {
+      console.error('Error fetching route:', error);
+    }
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to the Home Page</h1>
         {user ? (
-          <p className="text-xl">Hello, {user.userName}!</p>
+          <>
+            <div>
+              {origin && origin}
+              <AddressSearch btn={"출발지 검색"} setPlace={setOrigin} />
+            </div>
+            <div>
+              {destination && destination}
+              <AddressSearch btn={"도착지 검색"} setPlace={setDestination} />
+            </div>
+            <button onClick={findRoute}>경로 찾기</button>
+
+            {route && (
+              <div>
+                <h3>경로 정보:</h3>
+                <pre>{JSON.stringify(route, null, 2)}</pre>
+              </div>
+            )}
+            <KakaoMap origin={origin} destination={destination} />
+          </>
         ) : (
           <>
             <Link href="/signup">
