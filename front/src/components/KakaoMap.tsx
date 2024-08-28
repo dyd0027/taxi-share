@@ -39,7 +39,8 @@ const KakaoMap = ({ origin, destination }: KakaoMapProps) => {
             geocoder.addressSearch(address, (result: any, status: any) => {
               if (status === window.kakao.maps.services.Status.OK) {
                 const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
-
+                console.log('위도>>>',Number(result[0].y));
+                console.log('경도>>>',Number(result[0].x));
                 const marker = new window.kakao.maps.Marker({
                   map: map,
                   position: coords,

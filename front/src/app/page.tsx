@@ -5,7 +5,6 @@ import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
 import { useSession } from '@/hooks/useSession';
 import dynamic from 'next/dynamic';
-import AddressSearch from '@/components/AddressSearch';
 import { useMutation } from '@tanstack/react-query';
 import { route } from '@/api/map'; // 수정된 route 함수 가져오기
 import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
@@ -14,7 +13,9 @@ import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
 const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
   ssr: false,
 });
-
+const AddressSearch = dynamic(() => import('@/components/AddressSearch'), {
+  ssr: false,
+});
 export default function Home() {
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useUserStore((state) => state.user);
