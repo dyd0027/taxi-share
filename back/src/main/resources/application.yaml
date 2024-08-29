@@ -30,6 +30,7 @@ spring:
       port: 6379
   cache:
     type: redis
+
 management:
   endpoints:
     web:
@@ -38,3 +39,8 @@ management:
   endpoint:
     prometheus:
       enabled: true
+
+kakao:
+  rest:
+    api:
+      key: 9cb4a8bf50b426c084a473e6fb49ff48

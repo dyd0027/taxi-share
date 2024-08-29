@@ -29,7 +29,21 @@ public class Routes implements Serializable {
     @Schema(description = "The map's destination", example = "서울 서대문구")
     private String destination;
 
+    @Column(nullable = false)
+    @Schema(description = "The map's origin latitude", example = "30.1235")
+    private double originLatitude;
 
+    @Column(nullable = false)
+    @Schema(description = "The map's origin longitude", example = "130.335")
+    private double originLongitude;
+
+    @Column(nullable = false)
+    @Schema(description = "The map's destination latitude", example = "30.1535")
+    private double destinationLatitude;
+
+    @Column(nullable = false)
+    @Schema(description = "The map's destination longitude", example = "130.3235")
+    private double destinationLongitude;
 
 
     // getters and setters
