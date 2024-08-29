@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { RouteData } from "@/types/routeData";
+import { useEffect, useState } from "react";
 
 declare global {
   interface Window {
@@ -11,9 +12,12 @@ declare global {
 interface KakaoMapProps {
   origin?: string;
   destination?: string;
+  setSendData: (sendData: RouteData | ((prevState: RouteData) => RouteData)) => void;
 }
 
-const KakaoMap = ({ origin, destination }: KakaoMapProps) => {
+const KakaoMap = ({ origin, destination, setSendData }: KakaoMapProps) => {
+  const [latitude,setLatitude] = useState<number | 12>();
+  const [longitude,setLongitude] = useState<number | 0>();
   useEffect(() => {
     const kakaoMapScript = document.createElement('script');
     kakaoMapScript.async = true;
@@ -39,8 +43,8 @@ const KakaoMap = ({ origin, destination }: KakaoMapProps) => {
             geocoder.addressSearch(address, (result: any, status: any) => {
               if (status === window.kakao.maps.services.Status.OK) {
                 const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
-                console.log('위도>>>',Number(result[0].y));
-                console.log('경도>>>',Number(result[0].x));
+                setLatitude(Number(result[0].y));
+                setLongitude(Number(result[0].x));
                 const marker = new window.kakao.maps.Marker({
                   map: map,
                   position: coords,
@@ -49,16 +53,28 @@ const KakaoMap = ({ origin, destination }: KakaoMapProps) => {
 
                 // 지도 중심을 마커 위치로 이동
                 map.setCenter(coords);
+
               }
             });
           };
-
           // origin과 destination에 대해 마커를 설정
           if (origin) {
             setMarker(origin, "출발지");
+            setSendData((prevState) => ({
+                ...prevState,
+                origin: origin,
+                originLatitude: Number(latitude),
+                originLongitude: Number(longitude),
+            }));
           }
           if (destination) {
             setMarker(destination, "도착지");
+            setSendData((prevState) => ({
+              ...prevState,
+              destination: destination,
+              destinationLatitude: Number(latitude),
+              destinationLongitude: Number(longitude),
+          }));
           }
         } else {
           console.error("Kakao Map services are not available.");

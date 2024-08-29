@@ -21,6 +21,14 @@ export default function Home() {
   const user = useUserStore((state) => state.user);
   const [origin, setOrigin] = useState<string | undefined>();
   const [destination, setDestination] = useState<string | undefined>();
+  const [sendData, setSendData] = useState<RouteData>({
+    origin: '',
+    destination: '',
+    originLatitude: 0,
+    originLongitude: 0,
+    destinationLatitude: 0,
+    destinationLongitude: 0,
+});
   useSession();
 
   useEffect(() => {
@@ -33,7 +41,7 @@ export default function Home() {
 
   const handleFindRoute = () => {
     if (origin && destination) {
-      mutate({ origin, destination }); // RouteData 객체로 전달
+      mutate(sendData); // RouteData 객체로 전달
     } else {
       console.error('Origin and destination must be provided');
     }
@@ -66,7 +74,7 @@ export default function Home() {
                 <pre>{JSON.stringify(routeData, null, 2)}</pre>
               </div>
             )}
-            <KakaoMap origin={origin} destination={destination} />
+            <KakaoMap origin={origin} destination={destination} setSendData={setSendData}/>
           </>
         ) : (
           <>
