@@ -4,13 +4,14 @@ import { RouteData } from '@/types/routeData';
 
 axios.defaults.withCredentials = true;
 
-export const route = async (routeData: RouteData): Promise<RouteData> => {
+export const route = async (routeData: RouteData): Promise<String> => {
   try {
     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/route`, routeData, {
         headers: {
             'Content-Type': 'application/json',
         }
     });
+    console.log('response.data >>> ',response.data);
     return response.data;
   } catch (error: any) {
       if (error.response) {

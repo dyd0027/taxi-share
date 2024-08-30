@@ -28,15 +28,19 @@ export default function Home() {
     originLongitude: 0,
     destinationLatitude: 0,
     destinationLongitude: 0,
-});
+  });
+  const [routeData, setRouteData] = useState<any>(null); // 경로 데이터를 저장할 상태 추가
   useSession();
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  const { mutate, data: routeData, isError, error } = useMutation({
+  const { mutate, isError, error, status } = useMutation({
     mutationFn: (data: RouteData) => route(data), // RouteData 객체를 전달
+    onSuccess: (data) => {
+      setRouteData(data); // 성공 시 경로 데이터를 저장
+    },
   });
 
   const handleFindRoute = () => {
@@ -66,15 +70,7 @@ export default function Home() {
               <AddressSearch btn={"도착지 검색"} setPlace={setDestination} />
             </div>
             <button onClick={handleFindRoute}>경로 찾기</button>
-
-            {isError && <p>Error: {error.message}</p>}
-            {routeData && (
-              <div>
-                <h3>경로 정보:</h3>
-                <pre>{JSON.stringify(routeData, null, 2)}</pre>
-              </div>
-            )}
-            <KakaoMap origin={origin} destination={destination} setSendData={setSendData}/>
+            <KakaoMap origin={origin} destination={destination} setSendData={setSendData}  routeData={routeData} />
           </>
         ) : (
           <>

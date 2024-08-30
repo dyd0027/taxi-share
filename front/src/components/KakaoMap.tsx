@@ -11,10 +11,12 @@ interface KakaoMapProps {
   origin?: string;
   destination?: string;
   setSendData: (sendData: RouteData | ((prevState: RouteData) => RouteData)) => void;
+  routeData?: any;
 }
 
-const KakaoMap = ({ origin, destination, setSendData }: KakaoMapProps) => {
-
+const KakaoMap = ({ origin, destination, setSendData, routeData }: KakaoMapProps) => {
+  
+  const mapRef = useRef<any>(null);
   const prevOriginRef = useRef<string | undefined>();
   const prevDestinationRef = useRef<string | undefined>();
 
@@ -33,6 +35,7 @@ const KakaoMap = ({ origin, destination, setSendData }: KakaoMapProps) => {
         };
 
         const map = new window.kakao.maps.Map(container, options);
+        mapRef.current = map; // map 객체를 ref에 저장
 
         if (window.kakao.maps.services) {
           const geocoder = new window.kakao.maps.services.Geocoder();
@@ -89,6 +92,34 @@ const KakaoMap = ({ origin, destination, setSendData }: KakaoMapProps) => {
       }
     };
   }, [origin, destination]);
+
+
+  useEffect(() => {
+    if (routeData && mapRef.current) {
+      const map = mapRef.current;
+      const linePath: any[] = [];
+
+      routeData.routes[0].sections[0].roads.forEach((road: any) => {
+        road.vertexes.forEach((vertex: any, index: number) => {
+          // x,y 좌표가 우르르 들어옵니다. 그래서 인덱스가 짝수일 때만 linePath에 넣어봅시다.
+          // lat이 y이고 lng이 x입니다.
+          if (index % 2 === 0) {
+            linePath.push(new window.kakao.maps.LatLng(road.vertexes[index + 1], road.vertexes[index]));
+          }
+        });
+      });
+
+      const polyline = new window.kakao.maps.Polyline({
+        path: linePath,
+        strokeWeight: 5,
+        strokeColor: '#000000',
+        strokeOpacity: 0.7,
+        strokeStyle: 'solid',
+      });
+
+      polyline.setMap(map); // 지도에 경로를 그립니다.
+    }
+  }, [routeData]);
 
   return <div id="map" style={{ width: "100%", height: "500px" }}></div>;
 };
