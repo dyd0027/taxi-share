@@ -15,9 +15,8 @@ public class MapController {
     private final MapService mapService;
 
     @PostMapping("/route")
-    public ResponseEntity<Routes> getRoute(@RequestBody Routes routeData, HttpServletResponse response) {
+    public ResponseEntity<String> getRoute(@RequestBody Routes routeData, HttpServletResponse response) {
         log.info("Route object: {}", routeData);
-        mapService.route(routeData);
-        return ResponseEntity.ok(routeData);
+        return ResponseEntity.ok(mapService.route(routeData));
     }
 }

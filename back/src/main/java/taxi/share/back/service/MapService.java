@@ -23,7 +23,7 @@ public class MapService {
 
     private final RestTemplate restTemplate;
 
-    public void route(Routes routes){
+    public String route(Routes routes){
         String url = "https://apis-navi.kakaomobility.com/v1/directions";
 
         // 헤더 설정
@@ -48,5 +48,6 @@ public class MapService {
 
         log.info("Kakao API Response: {}", response.getBody());
 
+        return response.getBody();
     }
 }
