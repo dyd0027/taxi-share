@@ -1,22 +1,15 @@
 package taxi.share.back.util;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import taxi.share.back.model.User;
-import taxi.share.back.repository.UserRepository;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -26,7 +19,7 @@ import java.util.Date;
 public class JwtUtil {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String SECRET_KEY = "taxi_share";
-    private static final long EXPIRATION_TIME = 1_000; // 10 minutes
+    private static final long EXPIRATION_TIME = 600; // 600초
     private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
     @Autowired
     public JwtUtil(RedisTemplate<String, Object> redisTemplate) {
@@ -34,12 +27,12 @@ public class JwtUtil {
     }
     public String generateToken(String userId) {
         ZonedDateTime now = ZonedDateTime.now(KST_ZONE_ID);
-        ZonedDateTime expirationTime = now.plusMinutes(1);
+        ZonedDateTime expirationTime = now.plusMinutes(10);
 
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(Date.from(now.toInstant()))
-                .setExpiration(Date.from(expirationTime.toInstant()))
+                .setExpiration(Date.from(expirationTime.toInstant())) // 토큰 만료시간을 설정
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY.getBytes())
                 .compact();
     }
@@ -48,7 +41,7 @@ public class JwtUtil {
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
         cookie.setPath("/");
-        cookie.setMaxAge((int) (EXPIRATION_TIME)); // Convert milliseconds to seconds
+        cookie.setMaxAge((int) (EXPIRATION_TIME)); // 쿠키의 만료시간을 설정
         // Cross-site 요청에서도 쿠키 전송
 //        cookie.setDomain("localhost");
         response.addCookie(cookie);
