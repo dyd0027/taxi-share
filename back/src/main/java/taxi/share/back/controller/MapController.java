@@ -14,9 +14,34 @@ import taxi.share.back.service.MapService;
 public class MapController {
     private final MapService mapService;
 
+//    @PostMapping("/route")
+//    public ResponseEntity<String> getRoute(@RequestBody Routes routeData, HttpServletResponse response) {
+//        log.info("Route object: {}", routeData);
+//        return ResponseEntity.ok(mapService.route(routeData));
+//
+//
+//    }
+
+    // 테스트용
+    // 한명이 아니라 무조건 두명이 경로를 찾을때 연결해줘야함 매칭이 되어서 두명의 정보를 가져올 때(테스트)
     @PostMapping("/route")
     public ResponseEntity<String> getRoute(@RequestBody Routes routeData, HttpServletResponse response) {
+
+
         log.info("Route object: {}", routeData);
-        return ResponseEntity.ok(mapService.route(routeData));
+        // 두 번째 사용자의 경로
+        Routes route2 = new Routes();
+        route2.setRouteNO(1);
+        route2.setOriginLatitude(37.4682787075426); // 서초 경도
+        route2.setOriginLongitude(127.039136433366); // 서초 위도
+        route2.setDestinationLatitude(36.9878099898812); // 안성 경도
+        route2.setDestinationLongitude(127.301187652392); // 안성 위도
+
+
+
+        // 하드코딩된 경로를 사용하여 최적의 경로 계산
+        String result = mapService.routeWithWaypoints(routeData, route2);
+
+        return ResponseEntity.ok(result);
     }
 }
