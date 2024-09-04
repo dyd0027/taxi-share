@@ -99,6 +99,10 @@ const KakaoMap = ({ origin, destination, setSendData, routeData }: KakaoMapProps
       const map = mapRef.current;
       const linePath: any[] = [];
 
+      
+      console.log('map -> ');
+      console.log(map);
+
       routeData.routes[0].sections[0].roads.forEach((road: any) => {
         road.vertexes.forEach((vertex: any, index: number) => {
           // x,y 좌표가 우르르 들어옵니다. 그래서 인덱스가 짝수일 때만 linePath에 넣어봅시다.
