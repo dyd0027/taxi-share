@@ -42,7 +42,7 @@ public class UserService {
         }
     }
 
-    @Cacheable(value = "userCache", key = "#userId")
+    @Cacheable(value = "userCache", key = "#userId != null ? #userId : 'defaultKey'")
     public User findUserByUserId(String userId) throws Exception {
         // Redis에서 데이터 가져오는지 확인 하는 테스트 코드
         // 실제로 Redis cache에 저장되면 findUserByUserId메소드를 호출하지 않음
@@ -53,6 +53,7 @@ public class UserService {
 //        } else {
 //            System.out.println("Cache miss for key: " + userId);
 //        }
+        log.info("Service userId >>>> {}", userId);
         return userRepository.findByUserId(userId)
                 .orElseThrow(() -> new Exception("User not found"));
     }
