@@ -50,9 +50,9 @@ public class Routes implements Serializable {
     @Schema(description = "The map's destination longitude", example = "130.3235")
     private double destinationLongitude;
 
-    @Column(nullable = true)
+    @Column(name = "DISTANCE_M", nullable = true)
     @Schema(description = "출발지부터 도착지 거리", example = "12")
-    private double distanceKm;
+    private int distanceM;
 
     @Column(nullable = true)
     @Schema(description = "택시 탄 시간", example = "2024.03.02 22:03:10")
@@ -61,6 +61,18 @@ public class Routes implements Serializable {
     @Column(nullable = true)
     @Schema(description = "택시 내린 시간", example = "2024.03.02 22:03:10")
     private LocalDateTime endTime;
+
+    @Column(nullable = false)
+    @Schema(description = "혼자 탔을 때 택시비", example = "6400")
+    private int fare;
+
+    @Column(nullable = false)
+    @Schema(description = "톨비", example = "2000")
+    private int toll;
+
+    @Column(nullable = false)
+    @Schema(description = "실제 지불한 택시비", example = "4000")
+    private int paidFare;
 
     @Column(nullable = false)
     @Schema(description = "0:경로 찾는중, 1:share잡음, 2:도착, 3:결제완료", example = "0")

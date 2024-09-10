@@ -1,10 +1,12 @@
 package taxi.share.back.service;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,9 +50,48 @@ public class MapService {
                 String.class
         );
 
-        log.info("Kakao API Response: {}", response.getBody());
+        String jsonResponse = response.getBody();
+        log.info("Kakao API Response: {}", jsonResponse);
+
+        try {
+            // ObjectMapper 생성
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // JSON 문자열을 JsonNode로 파싱
+            JsonNode rootNode = objectMapper.readTree(jsonResponse);
+
+            // 원하는 값 추출 (예: distance, duration 등)
+            JsonNode routesNode = rootNode.path("routes");
+            if (routesNode.isArray()) {
+                for (JsonNode route : routesNode) {
+                    // Summary 정보 추출
+                    JsonNode summary = route.path("summary");
+                    int distance = summary.path("distance").asInt();
+                    JsonNode fare = summary.path("fare");
+                    int taxi = fare.path("taxi").asInt();
+                    int toll = fare.path("toll").asInt();
+
+                    routes.setDistanceM(distance);
+                    routes.setFare(taxi);
+                    routes.setToll(toll);
+                    registerRoute(routes);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return response.getBody();
+    }
+    @CachePut(value = "routeCache", key = "#routeNo")
+    public Routes registerRoute(Routes routes) throws Exception {
+        try {
+            return routesRepository.save(routes);
+        } catch (DataIntegrityViolationException e) {
+            throw new Exception("Data integrity violation during route save", e);
+        } catch (Exception e) {
+            throw new Exception("Error occurred while saving the route", e);
+        }
     }
 
     // test용

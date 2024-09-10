@@ -27,6 +27,7 @@ public class MapController {
     public ResponseEntity<String> getRoute(@RequestBody RouteRequest routeRequestData, HttpServletRequest request, HttpServletResponse response) {
         log.info("Route object: {}", routeRequestData.getRouteData());
         log.info("UserNo: {}", routeRequestData.getUserNo());
+        routeRequestData.getRouteData().setRtUserNo(routeRequestData.getUserNo());
         return ResponseEntity.ok(mapService.route(routeRequestData.getRouteData()));
     }
 //

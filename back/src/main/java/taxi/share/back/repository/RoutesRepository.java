@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface RoutesRepository extends JpaRepository<Routes, Integer> {
-    Optional<Routes> findByRouteNo(int routeNo);
+
 }
