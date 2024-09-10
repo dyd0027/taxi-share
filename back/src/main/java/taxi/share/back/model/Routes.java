@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ROUTES")
@@ -19,7 +20,11 @@ public class Routes implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "The unique ID of the routes", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-    private int routeNO;
+    private int routeNo;
+
+    @Column(nullable = false)
+    @Schema(description = "user No", example = "1")
+    private int rtUserNo;
 
     @Column(nullable = false)
     @Schema(description = "The map's origin", example = "서울 동대문구")
@@ -45,6 +50,24 @@ public class Routes implements Serializable {
     @Schema(description = "The map's destination longitude", example = "130.3235")
     private double destinationLongitude;
 
+    @Column(nullable = true)
+    @Schema(description = "출발지부터 도착지 거리", example = "12")
+    private double distanceKm;
 
+    @Column(nullable = true)
+    @Schema(description = "택시 탄 시간", example = "2024.03.02 22:03:10")
+    private LocalDateTime startTime;
+
+    @Column(nullable = true)
+    @Schema(description = "택시 내린 시간", example = "2024.03.02 22:03:10")
+    private LocalDateTime endTime;
+
+    @Column(nullable = false)
+    @Schema(description = "0:경로 찾는중, 1:share잡음, 2:도착, 3:결제완료", example = "0")
+    private int status;
+
+    @Column(nullable = false)
+    @Schema(description = "택시 타는 사람 수", example = "1")
+    private int personCnt;
     // getters and setters
 }

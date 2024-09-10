@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import taxi.share.back.model.Routes;
+import taxi.share.back.repository.RoutesRepository;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class MapService {
     private String kakaoApiKey;
 
     private final RestTemplate restTemplate;
+    private final RoutesRepository routesRepository;
 
     public String route(Routes routes){
         String url = "https://apis-navi.kakaomobility.com/v1/directions";
