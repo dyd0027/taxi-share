@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { login } from '../api/user';
-import { FormData } from '@/types/formData';
+import { UserFormData } from '@/types/userFormData';
 import { LoginFormData } from '@/types/loginFormData';
 import useUserStore from '@/store/useUserStore';
 
@@ -17,7 +17,7 @@ const LoginForm = () => {
 
   const router = useRouter();
   const setUserStore = useUserStore((state) => state.setUser);
-  const mutation = useMutation<FormData, Error, LoginFormData>({
+  const mutation = useMutation<UserFormData, Error, LoginFormData>({
     mutationFn: login,
     onSuccess: (data) => {
       setUserStore(data);

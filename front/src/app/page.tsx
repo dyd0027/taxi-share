@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 import { useMutation } from '@tanstack/react-query';
 import { route } from '@/api/map'; // 수정된 route 함수 가져오기
 import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
+import { UserFormData } from '@/types/userFormData';
 
 // KakaoMap 컴포넌트를 동적으로 불러옵니다. 이때 SSR을 비활성화합니다.
 const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
@@ -37,15 +38,19 @@ export default function Home() {
   }, []);
 
   const { mutate, isError, error, status } = useMutation({
-    mutationFn: (data: RouteData) => route(data), // RouteData 객체를 전달
+    mutationFn: ({ sendData, user }: { sendData: RouteData; user: UserFormData }) => route(sendData, user), // RouteData 객체를 전달
     onSuccess: (data) => {
       setRouteData(data); // 성공 시 경로 데이터를 저장
     },
   });
 
   const handleFindRoute = () => {
+    if (!user) {
+      console.error('User must be logged in to find route.');
+      return;
+    }
     if (origin && destination) {
-      mutate(sendData); // RouteData 객체로 전달
+      mutate({sendData, user}); // RouteData 객체로 전달
     } else {
       console.error('Origin and destination must be provided');
     }

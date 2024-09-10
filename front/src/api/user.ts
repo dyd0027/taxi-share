@@ -1,10 +1,10 @@
 // src/api/user.ts
 import axios from 'axios';
-import { FormData } from '@/types/formData';
+import { UserFormData } from '@/types/userFormData';
 import { LoginFormData } from '@/types/loginFormData';
 axios.defaults.withCredentials = true;
 // axios같은 경우 fetch보다 좀 더 유연하게 백엔드와의 통신을 할 수 있어서 axios를 많이 사용 함.
-export const user = async (formData: FormData): Promise<FormData> => {
+export const user = async (formData: UserFormData): Promise<UserFormData> => {
   const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/register`, formData, {
     headers: {
       'Content-Type': 'application/json',
@@ -13,7 +13,7 @@ export const user = async (formData: FormData): Promise<FormData> => {
   return response.data;
 };
 
-export const login = async (loginFormData: LoginFormData): Promise<FormData> => {
+export const login = async (loginFormData: LoginFormData): Promise<UserFormData> => {
   try {
     // param으로 보낼 때
     // const params = new URLSearchParams();

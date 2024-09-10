@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { user } from '../api/user';
-import { FormData } from '@/types/formData';
+import { FormData } from '@/types/userFormData';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState<FormData>({
