@@ -21,7 +21,8 @@ public class MapServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
-
+    @Mock
+    private RedisService redisService;
     @InjectMocks
     private MapService mapService;
 
@@ -49,4 +50,16 @@ public class MapServiceTest {
         // Assert that the response is as expected
         assertEquals("Mocked Kakao API Response", response);
     }
+
+    @Test
+    public void testCheckRoute() {
+        // redisService.getCachedData()의 동작을 미리 정의
+        when(redisService.getCachedData("routeCache::6")).thenReturn(new Object()); // 원하는 Mock 결과 설정
+
+        boolean result = mapService.checkRoute("routeCache::6");
+
+        // 결과 검증
+        assertEquals(true, result);
+    }
+
 }

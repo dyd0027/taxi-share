@@ -42,7 +42,7 @@ public class UserService {
         }
     }
 
-    @Cacheable(value = "userCache", key = "#userId != null ? #userId : 'defaultKey'")
+    @Cacheable(value = "userCache", key = "#root.args[0]")
     public User findUserByUserId(String userId) throws Exception {
         // Redis에서 데이터 가져오는지 확인 하는 테스트 코드
         // 실제로 Redis cache에 저장되면 findUserByUserId메소드를 호출하지 않음

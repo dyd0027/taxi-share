@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpEntity;
@@ -26,7 +27,8 @@ public class MapService {
 
     private final RestTemplate restTemplate;
     private final RoutesRepository routesRepository;
-
+    private final CacheManager cacheManager;
+    private final RedisService redisService;
     public String route(Routes routes){
         String url = "https://apis-navi.kakaomobility.com/v1/directions";
 
@@ -83,15 +85,29 @@ public class MapService {
 
         return response.getBody();
     }
-    @CachePut(value = "routeCache", key = "#routeNo")
+
     public Routes registerRoute(Routes routes) throws Exception {
         try {
-            return routesRepository.save(routes);
+            // 먼저 엔티티를 저장하여 routeNo가 생성되도록 합니다.
+            Routes savedRoute = routesRepository.save(routes);
+
+            // 저장된 routeNo를 캐시에 넣습니다.
+            if (savedRoute != null) {
+                cacheManager.getCache("routeCache").put(savedRoute.getRouteNo(), savedRoute);
+            }
+
+            return savedRoute;
         } catch (DataIntegrityViolationException e) {
             throw new Exception("Data integrity violation during route save", e);
         } catch (Exception e) {
             throw new Exception("Error occurred while saving the route", e);
         }
+    }
+
+    public boolean checkRoute(String key){
+        Routes routes1 = cacheManager.getCache("routeCache").get("15",Routes.class);
+        Routes routes = (Routes) redisService.getCachedData(key);
+        return true;
     }
 
     // test용
