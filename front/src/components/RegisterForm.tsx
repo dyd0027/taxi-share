@@ -5,10 +5,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { user } from '../api/user';
-import { FormData } from '@/types/formData';
+import { UserFormData } from '@/types/userFormData';
 
 const RegisterForm = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const [userFormData, setUserFormData] = useState<UserFormData>({
     userId: '',
     userPassword: '',
     userName: '',
@@ -19,7 +19,7 @@ const RegisterForm = () => {
 
   const router = useRouter();
 
-  const mutation = useMutation<FormData, Error, FormData>({
+  const mutation = useMutation<UserFormData, Error, UserFormData>({
     mutationFn: user,
     onSuccess: () => {
       router.push('/'); // 회원가입 성공 시 리다이렉트
@@ -33,18 +33,18 @@ const RegisterForm = () => {
     const { name, value } = e.target;
 
     const numericFields = ['userType']; // 숫자형으로 변환해야 할 필드 목록
-    
-    setFormData({
-      ...formData,
+
+    setUserFormData({
+      ...userFormData,
       [name]: numericFields.includes(name) ? Number(value) : value,
     });
 
-    
+
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(formData);
+    mutation.mutate(userFormData);
   };
 
   return (
@@ -54,7 +54,7 @@ const RegisterForm = () => {
         type="text"
         name="userId"
         placeholder="아이디"
-        value={formData.userId}
+        value={userFormData.userId}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         required
@@ -63,7 +63,7 @@ const RegisterForm = () => {
         type="password"
         name="userPassword"
         placeholder="비밀번호"
-        value={formData.userPassword}
+        value={userFormData.userPassword}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         required
@@ -72,7 +72,7 @@ const RegisterForm = () => {
         type="text"
         name="userName"
         placeholder="이름"
-        value={formData.userName}
+        value={userFormData.userName}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         required
@@ -81,14 +81,14 @@ const RegisterForm = () => {
         type="text"
         name="phoneNum"
         placeholder="전화번호 (예: 010-1111-1111)"
-        value={formData.phoneNum}
+        value={userFormData.phoneNum}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         required
       />
       <select
         name="userSex"
-        value={formData.userSex}
+        value={userFormData.userSex}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         aria-label="userSex"
@@ -98,7 +98,7 @@ const RegisterForm = () => {
       </select>
       <select
         name="userType"
-        value={formData.userType}
+        value={userFormData.userType}
         onChange={handleChange}
         className="border p-2 w-full mb-4"
         aria-label="userType"
