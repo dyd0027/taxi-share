@@ -27,7 +27,7 @@ public class JwtUtil {
     }
     public String generateToken(String userId) {
         ZonedDateTime now = ZonedDateTime.now(KST_ZONE_ID);
-        ZonedDateTime expirationTime = now.plusMinutes(1);
+        ZonedDateTime expirationTime = now.plusMinutes(100);
 
         return Jwts.builder()
                 .setSubject(userId)
