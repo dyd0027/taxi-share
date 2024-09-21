@@ -2,6 +2,7 @@ package taxi.share.back.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,9 +62,9 @@ public class MapService {
 
             // JSON 문자열을 JsonNode로 파싱
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
-
             // 원하는 값 추출 (예: distance, duration 등)
             JsonNode routesNode = rootNode.path("routes");
+            Routes newRoutes = new Routes();
             if (routesNode.isArray()) {
                 for (JsonNode route : routesNode) {
                     // Summary 정보 추출
@@ -76,14 +77,27 @@ public class MapService {
                     routes.setDistanceM(distance);
                     routes.setFare(taxi);
                     routes.setToll(toll);
-                    registerRoute(routes);
+                    newRoutes = registerRoute(routes);
                 }
             }
+
+            if (rootNode instanceof ObjectNode) {
+                ObjectNode objectNode = (ObjectNode) rootNode;
+
+                // 새로운 필드 추가 ("routeNo" : 원하는 숫자)
+                objectNode.put("routeNo", newRoutes.getRouteNo());  // 원하는 숫자를 여기에 넣음
+
+                // 변경된 JSON 객체를 다시 문자열로 변환
+                jsonResponse = objectMapper.writeValueAsString(objectNode);
+                System.out.println("Updated JSON: " + jsonResponse);
+            }
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return response.getBody();
+        return jsonResponse;
     }
 
     public Routes registerRoute(Routes routes) throws Exception {
