@@ -27,7 +27,7 @@ public class JwtUtil {
     }
     public String generateToken(String userId) {
         ZonedDateTime now = ZonedDateTime.now(KST_ZONE_ID);
-        ZonedDateTime expirationTime = now.plusMinutes(10);
+        ZonedDateTime expirationTime = now.plusMinutes(1);
 
         return Jwts.builder()
                 .setSubject(userId)
@@ -41,7 +41,7 @@ public class JwtUtil {
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
         cookie.setPath("/");
-        cookie.setMaxAge((int) (EXPIRATION_TIME)); // 쿠키의 만료시간을 설정
+//        cookie.setMaxAge((int) (EXPIRATION_TIME)); // 쿠키의 만료시간을 설정 -> 해당 시간이 지나면 서버에 접근하지 않아도 로그인 풀림
         // Cross-site 요청에서도 쿠키 전송
 //        cookie.setDomain("localhost");
         response.addCookie(cookie);
@@ -60,7 +60,7 @@ public class JwtUtil {
             String userId = e.getClaims().getSubject();
             log.info("Http Cookie Session 만료 >>>> {}", userId);
             redisTemplate.delete("userCache::" + userId);
-
+            redisTemplate.delete("tokenCache::" + userId);
             // 쿠키값 초기화
             invalidateCookie(response, "jwt-token");
             return false;
