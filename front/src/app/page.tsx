@@ -6,9 +6,10 @@ import useUserStore from '@/store/useUserStore';
 import { useSession } from '@/hooks/useSession';
 import dynamic from 'next/dynamic';
 import { useMutation } from '@tanstack/react-query';
-import { route } from '@/api/map'; // 수정된 route 함수 가져오기
+import { route, shareWaiting } from '@/api/map'; // 수정된 route 함수 가져오기
 import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
 import { UserFormData } from '@/types/userFormData';
+import { useRouter } from 'next/navigation';
 
 // KakaoMap 컴포넌트를 동적으로 불러옵니다. 이때 SSR을 비활성화합니다.
 const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
@@ -18,6 +19,9 @@ const AddressSearch = dynamic(() => import('@/components/AddressSearch'), {
   ssr: false,
 });
 export default function Home() {
+
+  const router = useRouter();
+
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useUserStore((state) => state.user);
   const [origin, setOrigin] = useState<string | undefined>();
@@ -37,10 +41,16 @@ export default function Home() {
     setIsHydrated(true);
   }, []);
 
-  const { mutate, isError, error, status } = useMutation({
+  const { mutate: mutateFindRoute, isError, error, status } = useMutation({
     mutationFn: ({ sendData, user }: { sendData: RouteData; user: UserFormData }) => route(sendData, user), // RouteData 객체를 전달
     onSuccess: (data) => {
       setRouteData(data); // 성공 시 경로 데이터를 저장
+    },
+  });
+  const { mutate: mutateShareRoute } = useMutation({
+    mutationFn: ({ sendData }: { sendData: RouteData; }) => shareWaiting(sendData), // RouteData 객체를 전달
+    onSuccess: (data) => {
+      router.push('/share');
     },
   });
 
@@ -50,7 +60,15 @@ export default function Home() {
       return;
     }
     if (origin && destination) {
-      mutate({sendData, user}); // RouteData 객체로 전달
+      mutateFindRoute({sendData, user}); // RouteData 객체로 전달
+    } else {
+      console.error('Origin and destination must be provided');
+    }
+  };
+
+  const handleShareRoute = () => {
+    if (sendData) {
+      mutateShareRoute({sendData}); // RouteData 객체로 전달
     } else {
       console.error('Origin and destination must be provided');
     }
@@ -74,7 +92,18 @@ export default function Home() {
               {destination && destination}
               <AddressSearch btn={"도착지 검색"} setPlace={setDestination} />
             </div>
-            <button onClick={handleFindRoute}>경로 찾기</button>
+            {
+              routeData ? (
+                <>
+                  {/* <Link href="/share">택시 공유하기</Link> */}
+                  <button onClick={handleShareRoute}>택시 공유하기</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={handleFindRoute}>경로 찾기</button>
+                </>
+              )
+            }
             <KakaoMap origin={origin} destination={destination} setSendData={setSendData}  routeData={routeData} />
           </>
         ) : (
