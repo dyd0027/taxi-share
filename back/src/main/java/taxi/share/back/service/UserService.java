@@ -29,21 +29,29 @@ public class UserService {
     }
 
     public User login(User dbUser, String password, HttpServletResponse response) throws Exception {
+        log.info("Client password (plain): {}", password); // 클라이언트에서 입력된 비밀번호
+        log.info("DB password (hashed): {}", dbUser.getUserPassword()); // DB에 저장된 해시된 비밀번호
+
         if (passwordEncoder.matches(password, dbUser.getUserPassword())) {
+            log.info("Password matched successfully!");
+
             String userId = dbUser.getUserId();
             String cachedToken = cacheManager.getCache("tokenCache").get(userId, String.class);
-            if (cachedToken != null){
+
+            if (cachedToken != null) {
                 jwtUtil.addTokenToCookie(cachedToken, response);
-            } else{
+            } else {
                 String token = jwtUtil.generateToken(userId);
                 jwtUtil.addTokenToCookie(token, response);
                 cacheManager.getCache("tokenCache").put(userId, token);
             }
             return dbUser;
         } else {
+            log.error("Invalid password.");
             throw new Exception("Invalid credentials");
         }
     }
+
 
     @Cacheable(value = "userCache", key = "#root.args[0]")
     public User findUserByUserId(String userId) throws Exception {

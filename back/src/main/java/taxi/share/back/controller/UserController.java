@@ -37,9 +37,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestBody User user, HttpServletResponse response) {
         log.info("user ID >>>>>>> {}", user.getUserId());
+        log.info("user password >>>>>>> {}", user.getUserPassword());
         try {
             User dbUser = userService.findUserByUserId(user.getUserId());
             User valiedUser = userService.login(dbUser, user.getUserPassword(), response);
+            log.info("user password >>>>>>> {}", valiedUser.getUserPassword());
             return ResponseEntity.ok(valiedUser);
         } catch (Exception e) {
             log.error("Login error: {}", e.getMessage());
