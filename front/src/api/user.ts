@@ -25,6 +25,8 @@ export const login = async (loginFormData: LoginFormData): Promise<UserFormData>
     //             'Content-Type': 'application/x-www-form-urlencoded',
     //         },
     //     });
+
+    console.log('Login form data:', loginFormData);
     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/login`, loginFormData, {
         headers: {
             'Content-Type': 'application/json',
