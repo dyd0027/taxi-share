@@ -9,6 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.geo.Circle;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.GeoResults;
+import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.RedisGeoCommands;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.domain.geo.Metrics;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,6 +25,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import taxi.share.back.model.Routes;
 import taxi.share.back.repository.RoutesRepository;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +41,7 @@ public class MapService {
     private final RestTemplate restTemplate;
     private final RoutesRepository routesRepository;
     private final CacheManager cacheManager;
+    private RedisTemplate<String, Object> redisTemplate;
     private final RedisService redisService;
     public String route(Routes routes){
 
@@ -125,23 +137,44 @@ public class MapService {
     }
 
     public String routeJoin(Routes route) {
-        // 헤더 설정
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "KakaoAK " + kakaoApiKey);
-        headers.set("Content-Type", "application/json");
+        saveUserLocation(route);
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = findNearbyOrigins(route.getOriginLongitude(), route.getOriginLatitude(), 300);
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDestinations = findNearbyDestinations(route.getDestinationLongitude(), route.getDestinationLatitude(), 300);
 
-        // 출발지, 경유지 및 목적지 설정 (하드코딩)
-        String origin = route.getOriginLongitude() + "," + route.getOriginLatitude();
-        String destination = route.getOriginLongitude() + "," + route.getOriginLatitude(); // 첫 번째 사용자의 목적지
-        findNearRoute(route);
+        Set<String> matchingUsers = new HashSet<>();
 
-        return "return";
+        // 출발지에서 매칭된 유저들 추출
+        Set<String> originUsers = nearbyOrigins.getContent().stream()
+                .map(result -> result.getContent().getName().toString())
+                .filter(routeNo -> !routeNo.equals(route.getRouteNo()))  // 자기 자신 필터링
+                .collect(Collectors.toSet());
+
+        // 도착지에서 매칭된 유저들과 비교하여 자기 자신을 제외하고 저장
+        nearbyDestinations.getContent().forEach(result -> {
+            String routeNo = result.getContent().getName().toString();
+            if (!routeNo.equals(route.getRouteNo()) && originUsers.contains(routeNo)) {  // 자기 자신 필터링
+                matchingUsers.add(routeNo);
+            }
+        });
+
+        return matchingUsers.toString();
     }
 
-    public void findNearRoute(Routes route){
-
+    public void saveUserLocation(Routes route){
+        redisTemplate.opsForGeo().add("route:origin", new Point(route.getOriginLongitude(), route.getOriginLatitude()), route.getRouteNo());
+        redisTemplate.opsForGeo().add("route:destination", new Point(route.getDestinationLongitude(), route.getDestinationLatitude()), route.getRouteNo());
+    }
+    // 출발지에서 radiusInMeters 이내 유저 검색
+    public GeoResults<RedisGeoCommands.GeoLocation<Object>> findNearbyOrigins(double longitude, double latitude, double radiusInMeters) {
+        Circle searchArea = new Circle(new Point(longitude, latitude), new Distance(radiusInMeters, Metrics.METERS));
+        return redisTemplate.opsForGeo().radius("route:origin", searchArea);
     }
 
+    // 도착지에서 radiusInMeters 이내 유저 검색
+    public GeoResults<RedisGeoCommands.GeoLocation<Object>> findNearbyDestinations(double longitude, double latitude, double radiusInMeters) {
+        Circle searchArea = new Circle(new Point(longitude, latitude), new Distance(radiusInMeters, Metrics.METERS));
+        return redisTemplate.opsForGeo().radius("route:destination", searchArea);
+    }
 //    public String routeWithWaypoints(Routes route) {
 //        // 헤더 설정
 //        HttpHeaders headers = new HttpHeaders();
