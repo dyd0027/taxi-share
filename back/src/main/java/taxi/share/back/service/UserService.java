@@ -52,8 +52,8 @@ public class UserService {
         }
     }
 
-
-    @Cacheable(value = "userCache", key = "#root.args[0]")
+    // 박현빈 로컬에서 오류나서 밑에 있는 어노테이션 주석처리
+   // @Cacheable(value = "userCache", key = "#root.args[0]")
     public User findUserByUserId(String userId) throws Exception {
         log.info("Service userId >>>> {}", userId);
         return userRepository.findByUserId(userId)
