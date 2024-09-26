@@ -26,8 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import taxi.share.back.model.Routes;
 import taxi.share.back.repository.RoutesRepository;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -137,43 +136,64 @@ public class MapService {
     }
 
     public String routeJoin(Routes route) {
+        // 1. 사용자의 위치를 저장 (출발지와 도착지)
         saveUserLocation(route);
-        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = findNearbyOrigins(route.getOriginLongitude(), route.getOriginLatitude(), 300);
-        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDestinations = findNearbyDestinations(route.getDestinationLongitude(), route.getDestinationLatitude(), 300);
 
-        Set<String> matchingUsers = new HashSet<>();
+        // 2. 출발지에서 반경 300m 이내의 사용자 검색
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = findNearbyOrigins(route.getOriginLongitude(), route.getOriginLatitude(), 3000);
 
-        // 출발지에서 매칭된 유저들 추출
+        // 3. 도착지에서 반경 300m 이내의 사용자 검색
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDestinations = findNearbyDestinations(route.getDestinationLongitude(), route.getDestinationLatitude(), 3000);
+
         Set<String> originUsers = nearbyOrigins.getContent().stream()
                 .map(result -> result.getContent().getName().toString())
                 .filter(routeNo -> !routeNo.equals(route.getRouteNo()))  // 자기 자신 필터링
                 .collect(Collectors.toSet());
 
-        // 도착지에서 매칭된 유저들과 비교하여 자기 자신을 제외하고 저장
+        List<String> matchingUsersList = new ArrayList<>();
+
+        // 4. 도착지에서 매칭된 유저들과 비교하여 자기 자신을 제외하고 결과에 추가
         nearbyDestinations.getContent().forEach(result -> {
             String routeNo = result.getContent().getName().toString();
             if (!routeNo.equals(route.getRouteNo()) && originUsers.contains(routeNo)) {  // 자기 자신 필터링
-                matchingUsers.add(routeNo);
+                // 거리 정보 추출
+//                double distance = result.getDistance().getValue();
+
+                // NearbyUsers 객체 생성
+//                Routes nearbyUser = Routes.builder()
+//                        .userName(routeNo)
+//                        .distance(distance)
+//                        .build();
+
+                matchingUsersList.add(result.getContent().toString());
             }
         });
-
-        return matchingUsers.toString();
+        return matchingUsersList.toString();
     }
 
-    public void saveUserLocation(Routes route){
+    public void saveUserLocation(Routes route) {
         redisTemplate.opsForGeo().add("route:origin", new Point(route.getOriginLongitude(), route.getOriginLatitude()), route.getRouteNo());
         redisTemplate.opsForGeo().add("route:destination", new Point(route.getDestinationLongitude(), route.getDestinationLatitude()), route.getRouteNo());
     }
+
     // 출발지에서 radiusInMeters 이내 유저 검색
     public GeoResults<RedisGeoCommands.GeoLocation<Object>> findNearbyOrigins(double longitude, double latitude, double radiusInMeters) {
         Circle searchArea = new Circle(new Point(longitude, latitude), new Distance(radiusInMeters, Metrics.METERS));
-        return redisTemplate.opsForGeo().radius("route:origin", searchArea);
+        RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
+                .includeDistance()   // 거리 정보를 포함하여 검색 결과에 포함
+                .sortAscending();    // 거리 기준으로 오름차순 정렬
+
+        return redisTemplate.opsForGeo().radius("route:origin", searchArea, args);
     }
 
     // 도착지에서 radiusInMeters 이내 유저 검색
     public GeoResults<RedisGeoCommands.GeoLocation<Object>> findNearbyDestinations(double longitude, double latitude, double radiusInMeters) {
         Circle searchArea = new Circle(new Point(longitude, latitude), new Distance(radiusInMeters, Metrics.METERS));
-        return redisTemplate.opsForGeo().radius("route:destination", searchArea);
+        RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
+                .includeDistance()   // 거리 정보를 포함하여 검색 결과에 포함
+                .sortAscending();    // 거리 기준으로 오름차순 정렬
+
+        return redisTemplate.opsForGeo().radius("route:destination", searchArea, args);
     }
 //    public String routeWithWaypoints(Routes route) {
 //        // 헤더 설정

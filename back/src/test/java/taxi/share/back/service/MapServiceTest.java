@@ -94,12 +94,12 @@ public class MapServiceTest {
         // 모킹된 결과로 가짜 리스트 생성 (출발지)
         List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> originResults = new ArrayList<>();
         originResults.add(mockGeoResult("2", 126.924876706923, 27.5251775245928));
-        originResults.add(mockGeoResult("3", 126.924876706923, 37.5251775245928));
+        originResults.add(mockGeoResult("3", 127.039136430366, 37.4682787070426));
         originResults.add(mockGeoResult("4", 126.924876706923, 38.5251775245928));
         // 모킹된 결과로 가짜 리스트 생성 (도착지)
         List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> destinationResults = new ArrayList<>();
         destinationResults.add(mockGeoResult("2", 126.934876706923, 17.5151775245928));
-        destinationResults.add(mockGeoResult("3", 126.934876706923, 36.5151775245928));
+        destinationResults.add(mockGeoResult("3", 127.301187650392, 36.9878099890812));
         destinationResults.add(mockGeoResult("4", 128.934876706923, 37.5151775245928));
         // GeoOperations의 radius 메서드 호출 결과를 모킹
         when(geoOperations.radius(eq("route:origin"), any())).thenReturn(new GeoResults<>(originResults));
