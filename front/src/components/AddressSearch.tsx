@@ -9,6 +9,7 @@ interface AddressSearchProps {
 
 const AddressSearch = ({ btn, setPlace }: AddressSearchProps) => {
     const buttonRef = useRef<HTMLButtonElement>(null);
+
     useEffect(() => {
         const script = document.createElement('script');
         script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
@@ -19,7 +20,6 @@ const AddressSearch = ({ btn, setPlace }: AddressSearchProps) => {
             const daum = (window as any).daum;
             const postcode = new daum.Postcode({
                 oncomplete: (data: any) => {
-                    console.log(data.address);
                     setPlace(data.address);
                 }
             });

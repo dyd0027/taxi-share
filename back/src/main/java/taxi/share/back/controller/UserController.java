@@ -3,6 +3,7 @@ package taxi.share.back.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import taxi.share.back.model.User;
@@ -18,11 +19,13 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final CacheManager cacheManager;
 
     @Autowired
-    public UserController(UserService userService, JwtUtil jwtUtil) {
+    public UserController(UserService userService, JwtUtil jwtUtil,CacheManager cacheManager) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
+        this.cacheManager = cacheManager;
     }
 
     @PostMapping("/register")
@@ -33,10 +36,12 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestBody User user, HttpServletResponse response) {
-        log.info("Login attempt for user: {}", user.getUserId());
+        log.info("user ID >>>>>>> {}", user.getUserId());
+        log.info("user password >>>>>>> {}", user.getUserPassword());
         try {
             User dbUser = userService.findUserByUserId(user.getUserId());
             User valiedUser = userService.login(dbUser, user.getUserPassword(), response);
+            log.info("user password >>>>>>> {}", valiedUser.getUserPassword());
             return ResponseEntity.ok(valiedUser);
         } catch (Exception e) {
             log.error("Login error: {}", e.getMessage());
