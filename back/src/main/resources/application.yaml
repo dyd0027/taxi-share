@@ -30,6 +30,7 @@ spring:
       port: 6379
   cache:
     type: redis
+
 management:
   endpoints:
     web:
@@ -38,3 +39,9 @@ management:
   endpoint:
     prometheus:
       enabled: true
+
+kakao:
+  rest:
+    api:
+      key: 306aeef5fb36618e6047ec1637662c25
+      url: https://apis-navi.kakaomobility.com/v1/directions

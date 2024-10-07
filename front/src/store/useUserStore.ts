@@ -1,11 +1,11 @@
 // src/store/useUserStore.ts
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { FormData } from '@/types/formData';
+import { UserFormData } from '@/types/userFormData';
 
 interface UserStore {
-  user: FormData | undefined;
-  setUser: (user: FormData | undefined) => void;
+  user: UserFormData | undefined;
+  setUser: (user: UserFormData | undefined) => void;
   logout: () => void;
 }
 

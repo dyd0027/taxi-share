@@ -1,4 +1,5 @@
-export interface FormData {
+export interface UserFormData {
+    userNo?: number;
     userId: string;
     userPassword: string;
     userName: string;
