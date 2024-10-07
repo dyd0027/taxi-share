@@ -18,10 +18,10 @@ const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
 const AddressSearch = dynamic(() => import('@/components/AddressSearch'), {
   ssr: false,
 });
+
+
 export default function Home() {
-
   const router = useRouter();
-
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useUserStore((state) => state.user);
   const [origin, setOrigin] = useState<string | undefined>();
@@ -34,24 +34,39 @@ export default function Home() {
     destinationLatitude: 0,
     destinationLongitude: 0,
   });
-  const [routeData, setRouteData] = useState<any>(null); // 경로 데이터를 저장할 상태 추가
+  const [routeData, setRouteData] = useState<any>(null); // 경로 데이터를 저장할 상태
+  const [loading, setLoading] = useState(false); // 로딩 상태 추가
+  const [matchResult, setMatchResult] = useState<any>(null); // 매칭 결과 저장
+  const [error, setError] = useState<string | null>(null); // 에러 처리
   useSession();
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  const { mutate: mutateFindRoute, isError, error, status } = useMutation({
+  const { mutate: mutateFindRoute, isError, error: findRouteError } = useMutation({
     mutationFn: ({ sendData, user }: { sendData: RouteData; user: UserFormData }) => route(sendData, user), // RouteData 객체를 전달
     onSuccess: (data) => {
       setRouteData(data); // 성공 시 경로 데이터를 저장
+      setLoading(false); // 로딩 완료
     },
+    onError: (error) => {
+      setLoading(false); // 에러 발생 시 로딩 종료
+      setError('경로 찾기에 실패했습니다.');
+    }
   });
+
   const { mutate: mutateShareRoute } = useMutation({
     mutationFn: ({ sendData }: { sendData: RouteData; }) => shareWaiting(sendData), // RouteData 객체를 전달
     onSuccess: (data) => {
-      router.push('/share');
+      // 매칭 완료 시 데이터 처리
+      setMatchResult(data); // 매칭 결과 저장
+      setLoading(false); // 로딩 종료
     },
+    onError: (error) => {
+      setLoading(false); // 에러 발생 시 로딩 종료
+      setError('매칭 시스템에 문제가 발생했습니다.');
+    }
   });
 
   const handleFindRoute = () => {
@@ -60,7 +75,14 @@ export default function Home() {
       return;
     }
     if (origin && destination) {
-      mutateFindRoute({sendData, user}); // RouteData 객체로 전달
+      setLoading(true); // 로딩 상태 시작
+      setError(null); // 에러 초기화
+
+      // 에러 발생 추후 수정 2024-10-08 마지막 수정
+      // router.push('/components/LoadingPage'); // 로딩 페이지로 이동 
+      
+      
+      mutateFindRoute({ sendData, user }); // 경로 찾기 로직 실행
     } else {
       console.error('Origin and destination must be provided');
     }
@@ -68,6 +90,8 @@ export default function Home() {
 
   const handleShareRoute = () => {
     if (sendData) {
+      setLoading(true); // 로딩 상태 시작
+      setError(null); // 에러 초기화
       mutateShareRoute({sendData}); // RouteData 객체로 전달
     } else {
       console.error('Origin and destination must be provided');
@@ -82,6 +106,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between px-24">
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to the Home Page</h1>
+
         {user ? (
           <>
             <div>
@@ -92,10 +117,12 @@ export default function Home() {
               {destination && destination}
               <AddressSearch btn={"도착지 검색"} setPlace={setDestination} />
             </div>
-            {
+
+            {loading ? ( // 로딩 상태일 때 로딩 화면을 표시
+              <p>매칭 시스템이 작동 중입니다. 잠시만 기다려 주세요...</p>
+            ) : (
               routeData ? (
                 <>
-                  {/* <Link href="/share">택시 공유하기</Link> */}
                   <button onClick={handleShareRoute}>택시 공유하기</button>
                 </>
               ) : (
@@ -103,8 +130,18 @@ export default function Home() {
                   <button onClick={handleFindRoute}>경로 찾기</button>
                 </>
               )
-            }
-            <KakaoMap origin={origin} destination={destination} setSendData={setSendData}  routeData={routeData} />
+            )}
+
+            {/* 매칭 결과가 있을 경우 표시 */}
+            {matchResult && (
+              <div>
+                <h2>매칭 완료!</h2>
+                <p>상대방과의 거리: {matchResult.distance} km</p>
+                <p>상대방 정보: {matchResult.partnerName}</p>
+              </div>
+            )}
+
+            <KakaoMap origin={origin} destination={destination} setSendData={setSendData} routeData={routeData} />
           </>
         ) : (
           <>
