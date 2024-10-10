@@ -15,10 +15,16 @@ import { useRouter } from 'next/navigation';
 const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
   ssr: false,
 });
+
+// AddressSearch 컴포넌트를 동적으로 불러옵니다.
 const AddressSearch = dynamic(() => import('@/components/AddressSearch'), {
   ssr: false,
 });
 
+// LoadingPage 컴포넌트를 동적으로 불러옵니다.
+const LoadingPage = dynamic(() => import('@/components/LodingPage'), {
+  ssr: false,
+});
 
 export default function Home() {
   const router = useRouter();
@@ -78,10 +84,7 @@ export default function Home() {
       setLoading(true); // 로딩 상태 시작
       setError(null); // 에러 초기화
 
-      // 에러 발생 추후 수정 2024-10-08 마지막 수정
-      // router.push('/components/LoadingPage'); // 로딩 페이지로 이동 
-      
-      
+      //router.push('/loading'); // 로딩 페이지로 이동 (올바른 경로로 이동)
       mutateFindRoute({ sendData, user }); // 경로 찾기 로직 실행
     } else {
       console.error('Origin and destination must be provided');
@@ -119,7 +122,7 @@ export default function Home() {
             </div>
 
             {loading ? ( // 로딩 상태일 때 로딩 화면을 표시
-              <p>매칭 시스템이 작동 중입니다. 잠시만 기다려 주세요...</p>
+              <LoadingPage /> // 동적 로딩 페이지 표시
             ) : (
               routeData ? (
                 <>
