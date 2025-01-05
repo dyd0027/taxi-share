@@ -31,15 +31,12 @@ public class UserService {
     public User login(User dbUser, String password, HttpServletResponse response) throws Exception {
         if (passwordEncoder.matches(password, dbUser.getUserPassword())) {
             String userId = dbUser.getUserId();
-            String cachedToken = cacheManager.getCache("tokenCache").get(userId, String.class);
-
-            if (cachedToken != null) {
-                jwtUtil.addTokenToCookie(cachedToken, response);
-            } else {
-                String token = jwtUtil.generateToken(userId);
-                jwtUtil.addTokenToCookie(token, response);
+            String token = cacheManager.getCache("tokenCache").get(userId, String.class);
+            if (token == null) {
+                token = jwtUtil.generateToken(userId);
                 cacheManager.getCache("tokenCache").put(userId, token);
             }
+            jwtUtil.addTokenToCookie(token, response);
             return dbUser;
         } else {
             log.error("Invalid password.");
