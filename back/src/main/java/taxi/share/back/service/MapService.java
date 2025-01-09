@@ -40,7 +40,7 @@ public class MapService {
     private final RestTemplate restTemplate;
     private final RoutesRepository routesRepository;
     private final CacheManager cacheManager;
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final RedisService redisService;
     public String route(Routes routes){
 
