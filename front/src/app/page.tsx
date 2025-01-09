@@ -4,12 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
 import { useSession } from '@/hooks/useSession';
-import dynamic from 'next/dynamic';
-import { useMutation } from '@tanstack/react-query';
-import { route, shareWaiting } from '@/api/map'; // 수정된 route 함수 가져오기
+import dynamic from 'next/dynamic'; // 수정된 route 함수 가져오기
 import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
-import { UserFormData } from '@/types/userFormData';
 import { useRouter } from 'next/navigation';
+import useFindRouteMutation from '@/hooks/useFindRouteMutation';
+import useJoinRouteMutation from '@/hooks/useJoinRouteMutation';
 
 // KakaoMap 컴포넌트를 동적으로 불러옵니다. 이때 SSR을 비활성화합니다.
 const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
@@ -50,29 +49,16 @@ export default function Home() {
     setIsHydrated(true);
   }, []);
 
-  const { mutate: mutateFindRoute, isError, error: findRouteError } = useMutation({
-    mutationFn: ({ sendData, user }: { sendData: RouteData; user: UserFormData }) => route(sendData, user), // RouteData 객체를 전달
-    onSuccess: (data) => {
-      setRouteData(data); // 성공 시 경로 데이터를 저장
-      setLoading(false); // 로딩 완료
-    },
-    onError: (error) => {
-      setLoading(false); // 에러 발생 시 로딩 종료
-      setError('경로 찾기에 실패했습니다.');
-    }
+  const findRouteMutation = useFindRouteMutation({
+    setRouteData,
+    setLoading,
+    setError,
   });
 
-  const { mutate: mutateShareRoute } = useMutation({
-    mutationFn: ({ sendData }: { sendData: RouteData; }) => shareWaiting(sendData), // RouteData 객체를 전달
-    onSuccess: (data) => {
-      // 매칭 완료 시 데이터 처리
-      setMatchResult(data); // 매칭 결과 저장
-      setLoading(false); // 로딩 종료
-    },
-    onError: (error) => {
-      setLoading(false); // 에러 발생 시 로딩 종료
-      setError('매칭 시스템에 문제가 발생했습니다.');
-    }
+  const joinRouteMutation = useJoinRouteMutation({
+    setMatchResult,
+    setLoading,
+    setError,
   });
 
   const handleFindRoute = () => {
@@ -85,7 +71,7 @@ export default function Home() {
       setError(null); // 에러 초기화
 
       //router.push('/loading'); // 로딩 페이지로 이동 (올바른 경로로 이동)
-      mutateFindRoute({ sendData, user }); // 경로 찾기 로직 실행
+      findRouteMutation.mutate({ sendData, user }); // 경로 찾기 로직 실행
     } else {
       console.error('Origin and destination must be provided');
     }
@@ -95,7 +81,7 @@ export default function Home() {
     if (sendData) {
       setLoading(true); // 로딩 상태 시작
       setError(null); // 에러 초기화
-      mutateShareRoute({sendData}); // RouteData 객체로 전달
+      joinRouteMutation.mutate({sendData}); // RouteData 객체로 전달
     } else {
       console.error('Origin and destination must be provided');
     }
