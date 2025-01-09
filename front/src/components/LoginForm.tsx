@@ -2,12 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
-import { login } from '../api/user';
-import { UserFormData } from '@/types/userFormData';
 import { LoginFormData } from '@/types/loginFormData';
-import useUserStore from '@/store/useUserStore';
+import useLoginMutation from '@/hooks/useLoginMutation' ;
 
 const LoginForm = () => {
   const [loginFormData, setLoginFormData] = useState<LoginFormData>({
@@ -15,18 +11,7 @@ const LoginForm = () => {
     userPassword: '',
   });
 
-  const router = useRouter();
-  const setUserStore = useUserStore((state) => state.setUser);
-  const mutation = useMutation<UserFormData, Error, LoginFormData>({
-    mutationFn: login,
-    onSuccess: (data) => {
-      setUserStore(data);
-      router.push('/'); // 회원가입 성공 시 리다이렉트
-    },
-    onError: (error: Error) => {
-      console.error('로그인 실패:', error);
-    },
-  });
+  const loginMutation = useLoginMutation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -38,7 +23,7 @@ const LoginForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(loginFormData);
+    loginMutation.mutate(loginFormData);
   };
 
   return (
