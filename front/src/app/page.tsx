@@ -6,7 +6,6 @@ import useUserStore from '@/store/useUserStore';
 import { useSession } from '@/hooks/useSession';
 import dynamic from 'next/dynamic'; // 수정된 route 함수 가져오기
 import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
-import { useRouter } from 'next/navigation';
 import useFindRouteMutation from '@/hooks/useFindRouteMutation';
 import useJoinRouteMutation from '@/hooks/useJoinRouteMutation';
 
@@ -26,7 +25,6 @@ const LoadingPage = dynamic(() => import('@/components/LodingPage'), {
 });
 
 export default function Home() {
-  const router = useRouter();
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useUserStore((state) => state.user);
   const [origin, setOrigin] = useState<string | undefined>();
@@ -49,11 +47,11 @@ export default function Home() {
     setIsHydrated(true);
   }, []);
 
-  const findRouteMutation = useFindRouteMutation({
+  const findRouteMutation = useFindRouteMutation(
     setRouteData,
     setLoading,
     setError,
-  });
+  );
 
   const joinRouteMutation = useJoinRouteMutation({
     setMatchResult,
@@ -81,7 +79,7 @@ export default function Home() {
     if (sendData) {
       setLoading(true); // 로딩 상태 시작
       setError(null); // 에러 초기화
-      joinRouteMutation.mutate({sendData}); // RouteData 객체로 전달
+      joinRouteMutation.mutate(sendData); // RouteData 객체로 전달
     } else {
       console.error('Origin and destination must be provided');
     }
