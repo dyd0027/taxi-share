@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic'; // 수정된 route 함수 가져오기
 import { RouteData } from '@/types/routeData'; // RouteData 타입 가져오기
 import useFindRouteMutation from '@/hooks/useFindRouteMutation';
 import useJoinRouteMutation from '@/hooks/useJoinRouteMutation';
+import MatchPage from '@/components/MatchPage';
 
 // KakaoMap 컴포넌트를 동적으로 불러옵니다. 이때 SSR을 비활성화합니다.
 const KakaoMap = dynamic(() => import('@/components/KakaoMap'), {
@@ -93,7 +94,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between px-24">
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to the Home Page</h1>
-
+        <MatchPage/>
         {user ? (
           <>
             <div>
