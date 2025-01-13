@@ -103,12 +103,12 @@ public class MapServiceTest {
         // 출발지
         geoOperations.add("route:origin", new Point(126.924876706923, 27.5251775245928), 2);
         geoOperations.add("route:origin", new Point(127.039136433366, 37.4682787075426), 3);
-        geoOperations.add("route:origin", new Point(126.924876706923, 38.5251775245928), 4);
+        geoOperations.add("route:origin", new Point(126.924876606923, 37.5251774245928), 4);
         // 도착지
         // 도착지 데이터 추가
         geoOperations.add("route:destination", new Point(126.934876706923, 17.5151775245928), 2);
-        geoOperations.add("route:destination", new Point(127.301187650392, 36.9878099890812), 3);
-        geoOperations.add("route:destination", new Point(128.934876706923, 37.5151775245928), 4);
+        geoOperations.add("route:destination", new Point(127.301187652392, 36.9878099898812), 3);
+        geoOperations.add("route:destination", new Point(126.933876605923, 37.5141774244928), 4);
 
         // 실제 테스트 메서드 호출
         String result = mapService.routeJoin(testRoute);

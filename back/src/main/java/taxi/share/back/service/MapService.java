@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.geo.Circle;
-import org.springframework.data.geo.Distance;
-import org.springframework.data.geo.GeoResults;
-import org.springframework.data.geo.Point;
+import org.springframework.data.geo.*;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.domain.geo.Metrics;
@@ -140,11 +137,11 @@ public class MapService {
         saveUserLocation(route);
 
         // 2. 출발지에서 반경 300m 이내의 사용자 검색
-        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = findNearbyOrigins(route.getOriginLongitude(), route.getOriginLatitude(), 3000);
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = findNearbyOrigins(route.getOriginLongitude(), route.getOriginLatitude(), 300);
 
         // 3. 도착지에서 반경 300m 이내의 사용자 검색
-        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDestinations = findNearbyDestinations(route.getDestinationLongitude(), route.getDestinationLatitude(), 3000);
-
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDestinations = findNearbyDestinations(route.getDestinationLongitude(), route.getDestinationLatitude(), 300);
+        Optional<Object> findMatchingUser = findMatchingUser(route.getOriginLongitude(), route.getOriginLatitude(),route.getDestinationLongitude(), route.getDestinationLatitude(), 300);
         Set<String> originUsers = nearbyOrigins.getContent().stream()
                 .map(result -> result.getContent().getName().toString())
                 .filter(routeNo -> !routeNo.equals(route.getRouteNo()))  // 자기 자신 필터링
@@ -195,6 +192,47 @@ public class MapService {
 
         return redisTemplate.opsForGeo().radius("route:destination", searchArea, args);
     }
+
+    public Optional<Object> findMatchingUser(double originLongitude, double originLatitude,
+                                             double destinationLongitude, double destinationLatitude,
+                                             double radiusInMeters) {
+        // 1. 출발지에서 반경 내 사용자 검색
+        Circle originSearchArea = new Circle(new Point(originLongitude, originLatitude), new Distance(radiusInMeters, Metrics.METERS));
+        RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
+                .includeDistance()
+                .sortAscending(); // 가까운 순으로 정렬
+
+        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = redisTemplate.opsForGeo().radius("route:origin", originSearchArea, args);
+
+        if (nearbyOrigins != null) {
+            // 2. 검색된 사용자 중 도착지 조건 검증
+            for (GeoResult<RedisGeoCommands.GeoLocation<Object>> originResult : nearbyOrigins) {
+                Object userId = originResult.getContent().getName();
+
+                // 2-1. 사용자 도착지의 좌표를 Redis에서 가져옴
+                List<Point> destinationPoints = redisTemplate.opsForGeo().position("route:destination", userId);
+                if (destinationPoints != null && !destinationPoints.isEmpty()) {
+                    Point userDestinationPoint = destinationPoints.get(0);
+
+                    // 2-2. 도착지 반경 검증
+                    Distance destinationDistance = redisTemplate.opsForGeo().distance(
+                            "route:destination",
+                            new Point(destinationLongitude, destinationLatitude),
+                            userDestinationPoint
+                    );
+
+                    if (destinationDistance != null && destinationDistance.getValue() <= radiusInMeters) {
+                        // 조건을 만족하는 첫 번째 사용자 반환
+                        return Optional.of(userId);
+                    }
+                }
+            }
+        }
+
+        // 조건을 만족하는 사용자가 없는 경우
+        return Optional.empty();
+    }
+
 //    public String routeWithWaypoints(Routes route) {
 //        // 헤더 설정
 //        HttpHeaders headers = new HttpHeaders();
