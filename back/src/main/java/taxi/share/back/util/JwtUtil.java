@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+
 @Slf4j
 @Component
 public class JwtUtil {
@@ -21,10 +22,12 @@ public class JwtUtil {
     private static final String SECRET_KEY = "taxi_share";
     private static final long EXPIRATION_TIME = 600; // 600초
     private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
+
     @Autowired
     public JwtUtil(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
+
     public String generateToken(String userId) {
         ZonedDateTime now = ZonedDateTime.now(KST_ZONE_ID);
         ZonedDateTime expirationTime = now.plusMinutes(100);
@@ -36,6 +39,7 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY.getBytes())
                 .compact();
     }
+
     public void addTokenToCookie(String token, HttpServletResponse response) {
         Cookie cookie = new Cookie("jwt-token", token);
         cookie.setHttpOnly(true);
@@ -46,6 +50,7 @@ public class JwtUtil {
 //        cookie.setDomain("localhost");
         response.addCookie(cookie);
     }
+
     public boolean validateToken(String token, HttpServletResponse response) {
         try {
             // JWT를 파싱하여 내용(Claims)을 추출
@@ -78,11 +83,21 @@ public class JwtUtil {
         }
         return null;
     }
+
     public void invalidateCookie(HttpServletResponse response, String cookieName) {
         Cookie cookie = new Cookie(cookieName, null);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+    }
+
+    public String getUserIdByToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY.getBytes())
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject()
+                .toString();
     }
 }
