@@ -7,7 +7,7 @@ class WebSocketService {
   constructor() {
     this.client = new Client({
       webSocketFactory: () =>
-        new SockJS("http://localhost:8080/ws") as unknown as IStompSocket, // 타입 강제 변환
+        new SockJS("http://localhost:8080/ws", null, { withCredentials: true } as any) as unknown as IStompSocket,
       reconnectDelay: 5000,
       debug: (msg) => console.log(msg),
     });
@@ -17,8 +17,8 @@ class WebSocketService {
     this.client.onConnect = (frame: Frame) => {
       console.log("Connected to WebSocket");
 
-      // this.client.subscribe("/user/queue/match", (message) => {
-      this.client.subscribe("/topic/general", (message) => {
+      this.client.subscribe("/user/queue/match", (message) => {
+      // this.client.subscribe("/topic/general", (message) => {
         const body = message.body;
         onMessageReceived(body);
       });
