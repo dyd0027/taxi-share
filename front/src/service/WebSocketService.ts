@@ -3,7 +3,6 @@ import SockJS from "sockjs-client";
 
 class WebSocketService {
   private client: Client;
-
   constructor() {
     this.client = new Client({
       webSocketFactory: () =>
@@ -13,12 +12,10 @@ class WebSocketService {
     });
   }
 
-  connect(onMessageReceived: (message: string) => void) {
+  connect(userId: String, onMessageReceived: (message: string) => void) {
     this.client.onConnect = (frame: Frame) => {
       console.log("Connected to WebSocket");
-
-      this.client.subscribe("/user/queue/match", (message) => {
-      // this.client.subscribe("/topic/general", (message) => {
+      this.client.subscribe(`/user/${userId}/queue/match`, (message) => {
         const body = message.body;
         onMessageReceived(body);
       });

@@ -94,9 +94,9 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between px-24">
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to the Home Page</h1>
-        <MatchPage/>
         {user ? (
           <>
+            <MatchPage userId={user.userId}/>
             <div>
               {origin && origin}
               <AddressSearch btn={"출발지 검색"} setPlace={setOrigin} />

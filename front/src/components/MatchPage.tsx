@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import WebSocketService from "../service/WebSocketService";
-
-const MatchPage: React.FC = () => {
+interface MatchPageProps {
+  userId: string;
+}
+const MatchPage = ({userId}: MatchPageProps) => {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -11,7 +13,7 @@ const MatchPage: React.FC = () => {
     };
 
     // WebSocket 연결 시작
-    WebSocketService.connect(handleMessage);
+    WebSocketService.connect(userId, handleMessage);
 
     // 컴포넌트가 언마운트될 때 WebSocket 연결 종료
     return () => {
