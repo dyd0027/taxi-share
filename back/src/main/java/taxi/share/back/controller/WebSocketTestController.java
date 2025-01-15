@@ -19,7 +19,7 @@ public class WebSocketTestController {
     private MessageSender messageSender; // 메시지 전송 클래스
     @GetMapping("/test")
     public void test(HttpServletRequest request, HttpServletResponse response, @RequestParam(name = "cookie", required = false) String cookie) {
-        String userId = "userA";
+        String userId = "1234";
         String message = "매칭되었습니다!";
         messageSender.sendMessageToUser(userId, message);
 

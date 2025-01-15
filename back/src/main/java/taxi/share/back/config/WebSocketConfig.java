@@ -25,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // 클라이언트로 메시지를 보낼 브로커 경로 설정
-        config.enableSimpleBroker("/queue", "/topic"); // 클라이언트가 구독할 경로
+        config.enableSimpleBroker("/user", "/topic"); // 클라이언트가 구독할 경로
         config.setApplicationDestinationPrefixes("/app"); // 서버가 처리할 메시지 경로 (클라이언트에서 보낼 때 사용, 필요 없으면 무시)
     }
 
@@ -51,7 +51,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     String userId = jwtUtil.getUserIdByToken(jwt);
                     accessor.setUser(new UsernamePasswordAuthenticationToken(userId, null, null)); // Principal 설정
                 }
-
+                System.out.println("User Info: " + accessor.getUser()); // User가 제대로 설정되었는지 확인
                 return message;
             }
         });

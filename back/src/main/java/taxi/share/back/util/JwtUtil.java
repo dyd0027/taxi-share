@@ -93,11 +93,19 @@ public class JwtUtil {
     }
 
     public String getUserIdByToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY.getBytes())
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject()
-                .toString();
+        try {
+            String userId = Jwts.parser()
+                    .setSigningKey(SECRET_KEY.getBytes())
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject()
+                    .toString();
+            return userId;
+        } catch (ExpiredJwtException e) {
+            // 토큰이 만료된 경우에도 Claims를 가져옴
+            String userId = e.getClaims().getSubject();
+            log.info("Web Socket >>> Http Cookie Session 만료 >>>> {}", userId);
+            return "";
+        }
     }
 }
