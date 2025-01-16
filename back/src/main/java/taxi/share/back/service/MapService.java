@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.geo.*;
 import org.springframework.data.redis.connection.RedisGeoCommands;
@@ -21,10 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import taxi.share.back.model.Routes;
-import taxi.share.back.repository.RoutesRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,10 +32,11 @@ public class MapService {
     @Value("${kakao.rest.api.url}")
     private String kakaoApiURL;
     private final RestTemplate restTemplate;
-    private final RoutesRepository routesRepository;
+    private final RouteService routeService;
     private final CacheManager cacheManager;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisService redisService;
+    private final MatchingService matchingService;
     public String route(Routes routes){
 
         // 헤더 설정
@@ -111,7 +109,7 @@ public class MapService {
     public Routes registerRoute(Routes routes) throws Exception {
         try {
             // 먼저 엔티티를 저장하여 routeNo가 생성되도록 합니다.
-            Routes savedRoute = routesRepository.save(routes);
+            Routes savedRoute = routeService.save(routes);
 
             // 저장된 routeNo를 캐시에 넣습니다.
             if (savedRoute != null) {
@@ -132,40 +130,45 @@ public class MapService {
         return true;
     }
 
-    public String routeJoin(Routes route) {
-        // 1. 사용자의 위치를 저장 (출발지와 도착지)
-        saveUserLocation(route);
+    public Integer routeJoin(Routes route){
+        try{
+            // 1. 사용자의 위치를 저장 (출발지와 도착지)
+            saveUserLocation(route);
 
-        // 2. 출발지에서 반경 300m 이내의 사용자 검색
-        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = findNearbyOrigins(route.getOriginLongitude(), route.getOriginLatitude(), 300);
+            // 2. 출발지에서 반경 300m 이내의 사용자 검색
+            GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = findNearbyOrigins(route.getOriginLongitude(), route.getOriginLatitude(), 300);
 
-        // 3. 도착지에서 반경 300m 이내의 사용자 검색
-        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDestinations = findNearbyDestinations(route.getDestinationLongitude(), route.getDestinationLatitude(), 300);
-        Optional<Object> findMatchingUser = findMatchingUser(route.getOriginLongitude(), route.getOriginLatitude(),route.getDestinationLongitude(), route.getDestinationLatitude(), 300);
-        Set<String> originUsers = nearbyOrigins.getContent().stream()
-                .map(result -> result.getContent().getName().toString())
-                .filter(routeNo -> !routeNo.equals(route.getRouteNo()))  // 자기 자신 필터링
-                .collect(Collectors.toSet());
+            // 3. 도착지에서 반경 300m 이내의 사용자 검색
+            GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDestinations = findNearbyDestinations(route.getDestinationLongitude(), route.getDestinationLatitude(), 300);
 
-        List<String> matchingUsersList = new ArrayList<>();
+            // Iterate over nearbyOrigins
+            for (GeoResult<RedisGeoCommands.GeoLocation<Object>> originResult : nearbyOrigins) {
+                RedisGeoCommands.GeoLocation<Object> originLocation = originResult.getContent();
+                int originName = (int) originLocation.getName();
 
-        // 4. 도착지에서 매칭된 유저들과 비교하여 자기 자신을 제외하고 결과에 추가
-        nearbyDestinations.getContent().forEach(result -> {
-            String routeNo = result.getContent().getName().toString();
-            if (!routeNo.equals(route.getRouteNo()) && originUsers.contains(routeNo)) {  // 자기 자신 필터링
-                // 거리 정보 추출
-//                double distance = result.getDistance().getValue();
+                // Exclude specific routeNo
+                if (originName == route.getRouteNo()) {
+                    continue;
+                }
 
-                // NearbyUsers 객체 생성
-//                Routes nearbyUser = Routes.builder()
-//                        .userName(routeNo)
-//                        .distance(distance)
-//                        .build();
+                // Compare with nearbyDestinations
+                for (GeoResult<RedisGeoCommands.GeoLocation<Object>> destinationResult : nearbyDestinations) {
+                    RedisGeoCommands.GeoLocation<Object> destinationLocation = destinationResult.getContent();
+                    int destinationName = (int) destinationLocation.getName();
 
-                matchingUsersList.add(result.getContent().toString());
+                    if (originName == destinationName) {
+                        // Match found, return the matching location
+                        Routes routesA = routeService.findByRoutesByRouteNo(originName);
+                        Routes routesB = routeService.findByRoutesByRouteNo(route.getRouteNo());
+                        matchingService.notifyMatchingSuccess(routesA.getRtUserNo(),routesB.getRtUserNo());
+                        return originName;
+                    }
+                }
             }
-        });
-        return matchingUsersList.toString();
+            return 0;
+        }catch (Exception e){
+            return -1;
+        }
     }
 
     public void saveUserLocation(Routes route) {

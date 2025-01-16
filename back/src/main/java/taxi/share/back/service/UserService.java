@@ -19,9 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final CacheManager cacheManager;
-    private final RedisService redisService;
 
     public User registerUser(User user) {
         user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
@@ -50,7 +48,11 @@ public class UserService {
         return userRepository.findByUserId(userId)
                 .orElseThrow(() -> new Exception("User not found"));
     }
-
+    @Cacheable(value = "userNoCache", key = "#p0")
+    public User findUserByUserNo(int userNo) throws Exception {
+        return userRepository.findByUserNo(userNo)
+                .orElseThrow(() -> new Exception("User not found"));
+    }
     public boolean validateToken(String token, HttpServletResponse response) {
         try {
             return jwtUtil.validateToken(token, response);

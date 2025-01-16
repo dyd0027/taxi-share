@@ -32,9 +32,9 @@ public class MapController {
     }
 
     @PostMapping("/join")
-    public ResponseEntity<String> getRoute(@RequestBody Routes routeData, HttpServletResponse response) {
+    public ResponseEntity<Integer> getRoute(@RequestBody Routes routeData, HttpServletResponse response) {
 
-        String result = mapService.routeJoin(routeData);
+        int result = mapService.routeJoin(routeData);
         return ResponseEntity.ok(result);
     }
 }

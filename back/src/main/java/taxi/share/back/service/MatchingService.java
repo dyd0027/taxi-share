@@ -1,20 +1,25 @@
 package taxi.share.back.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class MatchingService {
 
-    @Autowired
-    private MessageSender messageSender;
 
-    public void notifyMatchingSuccess(String userAId, String userBId) {
+    private final MessageSender messageSender;
+    private final UserService userService;
+    public void notifyMatchingSuccess(int userANo, int userBNo) {
         // 유저 A와 B에게 매칭 성공 메시지 전송
-        String messageA = "매칭되었습니다. 상대: " + userBId;
-        String messageB = "매칭되었습니다. 상대: " + userAId;
-
-        messageSender.sendMessageToUser(userAId, messageA);
-        messageSender.sendMessageToUser(userBId, messageB);
+        try {
+            String message = "매칭되었습니다.";
+            userService.findUserByUserNo(userANo);
+            messageSender.sendMessageToUser(userService.findUserByUserNo(userANo).getUserId(), message);
+            messageSender.sendMessageToUser(userService.findUserByUserNo(userBNo).getUserId(), message);
+        }catch (Exception e){
+            log.error("findUserByUserNo error");
+        }
     }
 }

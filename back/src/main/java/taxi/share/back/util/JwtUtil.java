@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import taxi.share.back.model.User;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -64,7 +65,9 @@ public class JwtUtil {
             // 토큰이 만료된 경우에도 Claims를 가져옴
             String userId = e.getClaims().getSubject();
             log.info("Http Cookie Session 만료 >>>> {}", userId);
+            User user = (User) redisTemplate.opsForValue().get(userId);
             redisTemplate.delete("userCache::" + userId);
+            redisTemplate.delete("userNoCache::" + user.getUserNo());
             redisTemplate.delete("tokenCache::" + userId);
             // 쿠키값 초기화
             invalidateCookie(response, "jwt-token");
