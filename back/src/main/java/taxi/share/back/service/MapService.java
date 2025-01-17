@@ -37,7 +37,7 @@ public class MapService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisService redisService;
     private final MatchingService matchingService;
-    public String route(Routes routes){
+    public JsonNode route(Routes routes){
 
         // 헤더 설정
         HttpHeaders headers = new HttpHeaders();
@@ -86,24 +86,20 @@ public class MapService {
                     newRoutes = registerRoute(routes);
                 }
             }
-
+            ObjectNode objectNode = null;
             if (rootNode instanceof ObjectNode) {
-                ObjectNode objectNode = (ObjectNode) rootNode;
+                objectNode = (ObjectNode) rootNode;
 
-                // 새로운 필드 추가 ("routeNo" : 원하는 숫자)
-                objectNode.put("routeNo", newRoutes.getRouteNo());  // 원하는 숫자를 여기에 넣음
-
-                // 변경된 JSON 객체를 다시 문자열로 변환
-                jsonResponse = objectMapper.writeValueAsString(objectNode);
-                System.out.println("Updated JSON: " + jsonResponse);
+                // 새로운 필드 추가 ("routeObj" : route)
+                objectNode.set("routeObj", objectMapper.valueToTree(newRoutes));
             }
-
+            return objectNode;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
 
-        return jsonResponse;
     }
 
     public Routes registerRoute(Routes routes) throws Exception {

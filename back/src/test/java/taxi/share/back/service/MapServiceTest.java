@@ -1,5 +1,7 @@
 package taxi.share.back.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -81,7 +83,7 @@ public class MapServiceTest {
         routes.setDestinationLongitude(127.301187652392);
 
         // Call the service method
-        String response = mapService.route(routes);
+        JsonNode response = mapService.route(routes);
 
         // Assert that the response is as expected
         assertEquals("Mocked Kakao API Response", response);

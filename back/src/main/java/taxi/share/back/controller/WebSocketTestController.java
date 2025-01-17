@@ -19,12 +19,12 @@ public class WebSocketTestController {
     private MessageSender messageSender; // 메시지 전송 클래스
     @GetMapping("/test")
     public void test(HttpServletRequest request, HttpServletResponse response, @RequestParam(name = "cookie", required = false) String cookie) {
-        int userNo = 1234;
+        String userId = "1234";
         String message = "매칭되었습니다!";
-        messageSender.sendMessageToUser(userNo, message);
+        messageSender.sendMessageToUser(userId, message);
 
         // 메시지가 전송되었는지 로그나 디버그로 확인
-        System.out.println("Message sent to user: " + userNo + " | Message: " + message);
+        System.out.println("Message sent to user: " + userId + " | Message: " + message);
     }
     @GetMapping("/test2")
     public void test2(HttpServletRequest request, HttpServletResponse response, @RequestParam(name = "cookie", required = false) String cookie) {

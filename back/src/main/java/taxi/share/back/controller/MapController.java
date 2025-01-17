@@ -1,5 +1,7 @@
 package taxi.share.back.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -24,7 +26,7 @@ public class MapController {
     }
 
     @PostMapping("/route")
-    public ResponseEntity<String> getRoute(@RequestBody RouteRequest routeRequestData, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<JsonNode> getRoute(@RequestBody RouteRequest routeRequestData, HttpServletRequest request, HttpServletResponse response) {
         log.info("Route object: {}", routeRequestData.getRouteData());
         log.info("UserNo: {}", routeRequestData.getUserNo());
         routeRequestData.getRouteData().setRtUserNo(routeRequestData.getUserNo());
