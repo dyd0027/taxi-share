@@ -5,7 +5,7 @@ import { UserFormData } from '@/types/userFormData';
 
 axios.defaults.withCredentials = true;
 
-export const route = async (routeData: RouteData, userData: UserFormData): Promise<String> => {
+export const route = async (routeData: RouteData, userData: UserFormData): Promise<string> => {
     try {
         const { userNo } = userData;
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/route`, { routeData, userNo }, {

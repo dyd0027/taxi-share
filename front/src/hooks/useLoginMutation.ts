@@ -13,7 +13,7 @@ const useLoginMutation = () => {
     mutationFn: login,
     onSuccess: (data) => {
       setUserStore(data);
-      router.push('/'); // 성공 시 리다이렉트
+      router.push('/share'); // 성공 시 리다이렉트
     },
     onError: (error: Error) => {
       console.error('로그인 실패:', error.message);
