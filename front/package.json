@@ -12,6 +12,7 @@
     "cypress:run": "cypress run"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
     "@tanstack/react-query": "^5.45.1",
     "@tanstack/react-query-devtools": "^5.51.16",
     "axios": "^1.7.2",
@@ -20,6 +21,7 @@
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
+    "sockjs-client": "^1.6.1",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
@@ -31,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/sockjs-client": "^1.5.4",
     "cypress": "^13.12.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",

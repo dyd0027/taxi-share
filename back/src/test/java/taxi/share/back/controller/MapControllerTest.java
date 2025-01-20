@@ -30,7 +30,7 @@ public class MapControllerTest {
     @WithMockUser(username = "testuser", roles = {"USER"})  // 가상의 인증 추가
     public void testGetRoute() throws Exception {
         // Mocking service response
-        Mockito.when(mapService.route(Mockito.any(Routes.class))).thenReturn("Mocked Kakao API response");
+        Mockito.when(mapService.route(Mockito.any(Routes.class))).thenReturn(null);
 
         // Request body
         String requestBody = """

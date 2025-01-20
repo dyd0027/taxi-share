@@ -19,9 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final CacheManager cacheManager;
-    private final RedisService redisService;
 
     public User registerUser(User user) {
         user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
@@ -29,22 +27,14 @@ public class UserService {
     }
 
     public User login(User dbUser, String password, HttpServletResponse response) throws Exception {
-        log.info("Client password (plain): {}", password); // 클라이언트에서 입력된 비밀번호
-        log.info("DB password (hashed): {}", dbUser.getUserPassword()); // DB에 저장된 해시된 비밀번호
-
         if (passwordEncoder.matches(password, dbUser.getUserPassword())) {
-            log.info("Password matched successfully!");
-
             String userId = dbUser.getUserId();
-            String cachedToken = cacheManager.getCache("tokenCache").get(userId, String.class);
-
-            if (cachedToken != null) {
-                jwtUtil.addTokenToCookie(cachedToken, response);
-            } else {
-                String token = jwtUtil.generateToken(userId);
-                jwtUtil.addTokenToCookie(token, response);
+            String token = cacheManager.getCache("tokenCache").get(userId, String.class);
+            if (token == null) {
+                token = jwtUtil.generateToken(userId);
                 cacheManager.getCache("tokenCache").put(userId, token);
             }
+            jwtUtil.addTokenToCookie(token, response);
             return dbUser;
         } else {
             log.error("Invalid password.");
@@ -53,13 +43,16 @@ public class UserService {
     }
 
     // 박현빈 로컬에서 오류나서 밑에 있는 어노테이션 주석처리
-   // @Cacheable(value = "userCache", key = "#root.args[0]")
+    @Cacheable(value = "userCache", key = "#p0")
     public User findUserByUserId(String userId) throws Exception {
-        log.info("Service userId >>>> {}", userId);
         return userRepository.findByUserId(userId)
                 .orElseThrow(() -> new Exception("User not found"));
     }
-
+    @Cacheable(value = "userNoCache", key = "#p0")
+    public User findUserByUserNo(int userNo) throws Exception {
+        return userRepository.findByUserNo(userNo)
+                .orElseThrow(() -> new Exception("User not found"));
+    }
     public boolean validateToken(String token, HttpServletResponse response) {
         try {
             return jwtUtil.validateToken(token, response);
