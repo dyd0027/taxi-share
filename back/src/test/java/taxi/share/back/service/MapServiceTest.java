@@ -1,11 +1,14 @@
 package taxi.share.back.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.geo.*;
 import org.springframework.data.redis.connection.RedisGeoCommands;
@@ -33,11 +36,16 @@ public class MapServiceTest {
     private RestTemplate restTemplate;
     @Mock
     private RedisService redisService;
-    @Mock
+//    @Mock
+//    private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
-    @Mock
+//    @Mock
+//    private GeoOperations<String, Object> geoOperations;
+
     private GeoOperations<String, Object> geoOperations;
-    @InjectMocks
+//    @InjectMocks
+    @Autowired
     private MapService mapService;
 
     private Routes testRoute;
@@ -55,7 +63,10 @@ public class MapServiceTest {
         testRoute.setDestinationLatitude(37.5151775245928);
 
         // RedisTemplate의 opsForGeo()가 geoOperations 모킹된 객체를 반환하도록 설정
-        when(redisTemplate.opsForGeo()).thenReturn(geoOperations);
+        // Mock 환경
+        // when(redisTemplate.opsForGeo()).thenReturn(geoOperations);
+        // 운영 환경
+        geoOperations = redisTemplate.opsForGeo();
     }
 
     @Test
@@ -72,7 +83,7 @@ public class MapServiceTest {
         routes.setDestinationLongitude(127.301187652392);
 
         // Call the service method
-        String response = mapService.route(routes);
+        JsonNode response = mapService.route(routes);
 
         // Assert that the response is as expected
         assertEquals("Mocked Kakao API Response", response);
@@ -91,25 +102,21 @@ public class MapServiceTest {
 
     @Test
     void testRouteJoin() {
-        // 모킹된 결과로 가짜 리스트 생성 (출발지)
-        List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> originResults = new ArrayList<>();
-        originResults.add(mockGeoResult("2", 126.924876706923, 27.5251775245928));
-        originResults.add(mockGeoResult("3", 127.039136430366, 37.4682787070426));
-        originResults.add(mockGeoResult("4", 126.924876706923, 38.5251775245928));
-        // 모킹된 결과로 가짜 리스트 생성 (도착지)
-        List<GeoResult<RedisGeoCommands.GeoLocation<Object>>> destinationResults = new ArrayList<>();
-        destinationResults.add(mockGeoResult("2", 126.934876706923, 17.5151775245928));
-        destinationResults.add(mockGeoResult("3", 127.301187650392, 36.9878099890812));
-        destinationResults.add(mockGeoResult("4", 128.934876706923, 37.5151775245928));
-        // GeoOperations의 radius 메서드 호출 결과를 모킹
-        when(geoOperations.radius(eq("route:origin"), any())).thenReturn(new GeoResults<>(originResults));
-        when(geoOperations.radius(eq("route:destination"), any())).thenReturn(new GeoResults<>(destinationResults));
+        // 출발지
+        geoOperations.add("route:origin", new Point(126.924876706923, 27.5251775245928), 2);
+        geoOperations.add("route:origin", new Point(127.039136433366, 37.4682787075426), 3);
+        geoOperations.add("route:origin", new Point(126.924876606923, 37.5251774245928), 4);
+        // 도착지
+        // 도착지 데이터 추가
+        geoOperations.add("route:destination", new Point(126.934876706923, 17.5151775245928), 2);
+        geoOperations.add("route:destination", new Point(127.301187652392, 36.9878099898812), 3);
+        geoOperations.add("route:destination", new Point(126.933876605923, 37.5141774244928), 4);
 
         // 실제 테스트 메서드 호출
-        String result = mapService.routeJoin(testRoute);
+        int result = mapService.routeJoin(testRoute);
 
         // 결과 값이 예상과 같은지 검증
-        assertEquals("[2]", result);
+        assertEquals(4, result);
     }
 
     // 가짜 GeoLocation 객체 생성 유틸리티 메서드

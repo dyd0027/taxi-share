@@ -5,7 +5,7 @@ import { UserFormData } from '@/types/userFormData';
 
 axios.defaults.withCredentials = true;
 
-export const route = async (routeData: RouteData, userData: UserFormData): Promise<String> => {
+export const route = async (routeData: RouteData, userData: UserFormData): Promise<string> => {
     try {
         const { userNo } = userData;
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/route`, { routeData, userNo }, {
@@ -32,9 +32,9 @@ export const route = async (routeData: RouteData, userData: UserFormData): Promi
     }
 };
 
-export const shareWaiting = async (routeData: RouteData): Promise<String> => {
+export const joinRoute = async (routeData: RouteData): Promise<String> => {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/shareWaiting`, { routeData }, {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/join`, { routeData }, {
             headers: {
                 'Content-Type': 'application/json',
             }
