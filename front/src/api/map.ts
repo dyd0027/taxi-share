@@ -34,7 +34,7 @@ export const route = async (routeData: RouteData, userData: UserFormData): Promi
 
 export const joinRoute = async (routeData: RouteData): Promise<String> => {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/join`, { routeData }, {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/join`, routeData, {
             headers: {
                 'Content-Type': 'application/json',
             }

@@ -79,10 +79,10 @@ export default function SharePage() {
   };
 
   const handleShareRoute = () => {
-    if (sendData) {
+    if (route) {
       setLoading(true); // 로딩 상태 시작
       setError(null); // 에러 초기화
-      joinRouteMutation.mutate(sendData); // RouteData 객체로 전달
+      joinRouteMutation.mutate(route); // RouteData 객체로 전달
     } else {
       console.error('Origin and destination must be provided');
     }
