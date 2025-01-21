@@ -11,10 +11,10 @@ interface KakaoMapProps {
   origin?: string;
   destination?: string;
   setSendData: (sendData: RouteData | ((prevState: RouteData) => RouteData)) => void;
-  routeData?: any;
+  kakaoRouteData?: any;
 }
 
-const KakaoMap = ({ origin, destination, setSendData, routeData }: KakaoMapProps) => {
+const KakaoMap = ({ origin, destination, setSendData, kakaoRouteData }: KakaoMapProps) => {
   
   const mapRef = useRef<any>(null);
   const prevOriginRef = useRef<string | undefined>();
@@ -95,7 +95,7 @@ const KakaoMap = ({ origin, destination, setSendData, routeData }: KakaoMapProps
 
 
   useEffect(() => {
-    if (routeData && mapRef.current) {
+    if (kakaoRouteData && mapRef.current) {
       const map = mapRef.current;
       const linePath: any[] = [];
 
@@ -103,7 +103,7 @@ const KakaoMap = ({ origin, destination, setSendData, routeData }: KakaoMapProps
       console.log('map -> ');
       console.log(map);
 
-      routeData.routes[0].sections[0].roads.forEach((road: any) => {
+      kakaoRouteData.routes[0].sections[0].roads.forEach((road: any) => {
         road.vertexes.forEach((vertex: any, index: number) => {
           // x,y 좌표가 우르르 들어옵니다. 그래서 인덱스가 짝수일 때만 linePath에 넣어봅시다.
           // lat이 y이고 lng이 x입니다.
@@ -123,7 +123,7 @@ const KakaoMap = ({ origin, destination, setSendData, routeData }: KakaoMapProps
 
       polyline.setMap(map); // 지도에 경로를 그립니다.
     }
-  }, [routeData]);
+  }, [kakaoRouteData]);
 
   return <div id="map" style={{ width: "100%", height: "500px" }}></div>;
 };

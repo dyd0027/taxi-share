@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Link from "next/link";
 import useUserStore from '@/store/useUserStore';
 import useRouteStore from '@/store/useRouteStore';
 import { useSession } from '@/hooks/useSession';
@@ -32,15 +31,16 @@ export default function SharePage() {
   const route = useRouteStore((state) => state.route);
   const [origin, setOrigin] = useState<string | undefined>();
   const [destination, setDestination] = useState<string | undefined>();
-  const [sendData, setSendData] = useState<RouteData>({
+  const initialState: RouteData = {
     origin: '',
     destination: '',
     originLatitude: 0,
     originLongitude: 0,
     destinationLatitude: 0,
     destinationLongitude: 0,
-  });
-  const [routeData, setRouteData] = useState<any>(null); // 경로 데이터를 저장할 상태
+  };
+  const [sendData, setSendData] = useState<RouteData>(initialState);
+  const [kakaoRouteData, setKaKaoRouteData] = useState<any>(null); // 경로 데이터를 저장할 상태
   const [loading, setLoading] = useState(false); // 로딩 상태 추가
   const [matchResult, setMatchResult] = useState<any>(null); // 매칭 결과 저장
   const [error, setError] = useState<string | null>(null); // 에러 처리
@@ -51,7 +51,7 @@ export default function SharePage() {
   }, []);
 
   const findRouteMutation = useFindRouteMutation(
-    setRouteData,
+    setKaKaoRouteData,
     setLoading,
     setError,
   );
@@ -70,10 +70,9 @@ export default function SharePage() {
     if (origin && destination) {
       setLoading(true); // 로딩 상태 시작
       setError(null); // 에러 초기화
-
-      //router.push('/loading'); // 로딩 페이지로 이동 (올바른 경로로 이동)
       findRouteMutation.mutate({ sendData, user }); // 경로 찾기 로직 실행
     } else {
+      alert('Origin and destination must be provided');
       console.error('Origin and destination must be provided');
     }
   };
@@ -84,9 +83,17 @@ export default function SharePage() {
       setError(null); // 에러 초기화
       joinRouteMutation.mutate(route); // RouteData 객체로 전달
     } else {
-      console.error('Origin and destination must be provided');
+      alert('오류발생. 재시도 부탁바랍니다.');
+      window.location.reload();
     }
   };
+
+  const handleResetRoute = () => {
+    setKaKaoRouteData(null);
+    setOrigin(undefined);
+    setDestination(undefined);
+    setSendData(initialState);
+  }
 
   if (!isHydrated) {
     return null; // 클라이언트 측에서 초기화될 때까지 아무것도 렌더링하지 않음
@@ -97,24 +104,25 @@ export default function SharePage() {
       <div className="min-h-screen flex flex-col items-center justify-center">
           {user && <MatchPage userId={user.userId}/>}
           <div>
-            {route ? route.origin : origin && origin}
-            <AddressSearch btn={"출발지 검색"} setPlace={setOrigin} />
+            {origin && (<p>출발지: {origin}</p> )}
+            {!kakaoRouteData&&<AddressSearch btn={"출발지 검색"} setPlace={setOrigin} />}
           </div>
           <div>
-            {route ? route.destination : destination && destination}
-            <AddressSearch btn={"도착지 검색"} setPlace={setDestination} />
+            {destination && (<p>도착지: {destination}</p>)}
+            {!kakaoRouteData&&<AddressSearch btn={"도착지 검색"} setPlace={setDestination} />}
           </div>
 
           {loading ? ( // 로딩 상태일 때 로딩 화면을 표시
             <LoadingPage /> // 동적 로딩 페이지 표시
           ) : (
-            routeData ? (
+            kakaoRouteData ? (
               <>
-                <button onClick={handleShareRoute}>택시 공유하기</button>
+                <button onClick={handleShareRoute} className="bg-blue-500 text-white p-2 m-2">택시 공유하기</button>
+                <button onClick={handleResetRoute} className="bg-blue-500 text-white p-2 m-2">재탐색</button>
               </>
             ) : (
               <>
-                <button onClick={handleFindRoute}>경로 찾기</button>
+                <button onClick={handleFindRoute} className="bg-blue-500 text-white p-2 m-2">경로 찾기</button>
               </>
             )
           )}
@@ -128,7 +136,7 @@ export default function SharePage() {
             </div>
           )}
 
-          <KakaoMap origin={origin} destination={destination} setSendData={setSendData} routeData={routeData} />
+          <KakaoMap origin={origin} destination={destination} setSendData={setSendData} kakaoRouteData={kakaoRouteData} />
       </div>
     </main>
   );
