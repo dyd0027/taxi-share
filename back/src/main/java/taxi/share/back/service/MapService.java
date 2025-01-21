@@ -83,7 +83,7 @@ public class MapService {
                     routes.setDistanceM(distance);
                     routes.setFare(taxi);
                     routes.setToll(toll);
-                    newRoutes = registerRoute(routes);
+//                    newRoutes = registerRoute(routes);
                 }
             }
             ObjectNode objectNode = null;
@@ -91,7 +91,7 @@ public class MapService {
                 objectNode = (ObjectNode) rootNode;
 
                 // 새로운 필드 추가 ("routeObj" : route)
-                objectNode.set("routeObj", objectMapper.valueToTree(newRoutes));
+                objectNode.set("routeObj", objectMapper.valueToTree(routes));
             }
             return objectNode;
 
@@ -126,8 +126,11 @@ public class MapService {
         return true;
     }
 
-    public Integer routeJoin(Routes route){
+    public Integer routeJoin(Routes routes){
         try{
+            // 루트 저장
+            Routes route = registerRoute(routes);
+
             // 1. 사용자의 위치를 저장 (출발지와 도착지)
             saveUserLocation(route);
 
