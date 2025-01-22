@@ -32,15 +32,17 @@ export const route = async (routeData: RouteData, userData: UserFormData): Promi
     }
 };
 
-export const joinRoute = async (routeData: RouteData): Promise<String> => {
+export const joinRoute = async (routeData: RouteData): Promise<void> => {
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/map/join`, routeData, {
             headers: {
                 'Content-Type': 'application/json',
             }
         });
-        console.log('response.data >>> ', response.data);
-        return response.data;
+        // status 코드가 200(OK)이거나 204(No Content)라면 정상 처리로 인식 가능
+        if (response.status === 200 || response.status === 204) {
+            console.log('정상 처리되었습니다');
+        }
     } catch (error: any) {
         if (error.response) {
             // 서버 응답이 있는 경우

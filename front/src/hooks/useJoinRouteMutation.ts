@@ -14,13 +14,12 @@ const useJoinRouteMutation = ({
   setError: (error: string | null) => void;
 }) => {
   // 매개변수가 한 개인 경우에는 타입만 지정해주면 되기 때문에 메소드명만 적어줘도 됨 -> 코드 간결해짐. 비교: useFindRouteMutation.ts
-  return useMutation<String, Error, RouteData>({
+  return useMutation<void, Error, RouteData>({
     mutationFn: joinRoute,
     onSuccess: (data) => {
       setMatchResult(data); // 성공 시 경로 데이터를 저장
-      setLoading(false); // 로딩 상태 해제
     },
-    onError: () => {
+    onError: (err) => {
       setLoading(false);
       setError('매칭 시스템에 문제가 발생했습니다.');
     },
