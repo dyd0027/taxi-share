@@ -126,8 +126,9 @@ public class MapService {
         return true;
     }
 
-    public Integer routeJoin(Routes routes){
+    public void routeJoin(Routes routes){
         try{
+            routes.setStatus(1);
             // 루트 저장
             Routes route = registerRoute(routes);
 
@@ -160,13 +161,11 @@ public class MapService {
                         Routes routesA = routeService.findByRoutesByRouteNo(originName);
                         Routes routesB = routeService.findByRoutesByRouteNo(route.getRouteNo());
                         matchingService.notifyMatchingSuccess(routesA.getRtUserNo(),routesB.getRtUserNo());
-                        return originName;
                     }
                 }
             }
-            return 0;
         }catch (Exception e){
-            return -1;
+            log.error("매칭 join 에러"+e.getMessage());
         }
     }
 
