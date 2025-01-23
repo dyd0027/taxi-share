@@ -19,14 +19,14 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtUtil {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisUtil redisUtil;
     private static final String SECRET_KEY = "taxi_share";
     private static final long EXPIRATION_TIME = 600; // 600초
     private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
 
     @Autowired
-    public JwtUtil(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public JwtUtil(RedisUtil redisUtil) {
+        this.redisUtil = redisUtil;
     }
 
     public String generateToken(String userId) {
@@ -65,10 +65,10 @@ public class JwtUtil {
             // 토큰이 만료된 경우에도 Claims를 가져옴
             String userId = e.getClaims().getSubject();
             log.info("Http Cookie Session 만료 >>>> {}", userId);
-            User user = (User) redisTemplate.opsForValue().get("userCache::"+userId);
-            redisTemplate.delete("userCache::" + userId);
-            redisTemplate.delete("userNoCache::" + user.getUserNo());
-            redisTemplate.delete("tokenCache::" + userId);
+            User user = (User) redisUtil.getFromCache("userCache",userId, User.class);
+            redisUtil.evict("userCache",userId);
+            redisUtil.evict("userNoCache",user.getUserNo());
+            redisUtil.evict("tokenCache",userId);
             // 쿠키값 초기화
             invalidateCookie(response, "jwt-token");
             return false;

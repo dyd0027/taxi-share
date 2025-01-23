@@ -16,9 +16,10 @@ public class RouteService {
     public Routes save(Routes routes){
       return routesRepository.save(routes);
     };
-    @Cacheable(value = "routeCache::", key = "#p[0]")
+    @Cacheable(value = "routeCache", key = "#p[0]")
     public Routes findByRoutesByRouteNo(int routeNo) throws Exception  {
         return routesRepository.findByRouteNo(routeNo)
                 .orElseThrow(() -> new Exception("Route not found"));
     }
+
 }

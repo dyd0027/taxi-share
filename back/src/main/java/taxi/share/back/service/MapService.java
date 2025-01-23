@@ -35,7 +35,6 @@ public class MapService {
     private final RouteService routeService;
     private final CacheManager cacheManager;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisService redisService;
     private final MatchingService matchingService;
     public JsonNode route(Routes routes){
 
@@ -70,7 +69,6 @@ public class MapService {
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
             // 원하는 값 추출 (예: distance, duration 등)
             JsonNode routesNode = rootNode.path("routes");
-            Routes newRoutes = new Routes();
             if (routesNode.isArray()) {
                 for (JsonNode route : routesNode) {
                     // Summary 정보 추출
@@ -83,7 +81,6 @@ public class MapService {
                     routes.setDistanceM(distance);
                     routes.setFare(taxi);
                     routes.setToll(toll);
-//                    newRoutes = registerRoute(routes);
                 }
             }
             ObjectNode objectNode = null;
@@ -120,15 +117,8 @@ public class MapService {
         }
     }
 
-    public boolean checkRoute(String key){
-        Routes routes1 = cacheManager.getCache("routeCache").get("15",Routes.class);
-        Routes routes = (Routes) redisService.getCachedData(key);
-        return true;
-    }
-
     public void routeJoin(Routes routes){
         try{
-            routes.setStatus(1);
             // 루트 저장
             Routes route = registerRoute(routes);
 
@@ -144,21 +134,21 @@ public class MapService {
             // Iterate over nearbyOrigins
             for (GeoResult<RedisGeoCommands.GeoLocation<Object>> originResult : nearbyOrigins) {
                 RedisGeoCommands.GeoLocation<Object> originLocation = originResult.getContent();
-                int originName = (int) originLocation.getName();
+                int originRouteNo = (int) originLocation.getName();
 
                 // Exclude specific routeNo
-                if (originName == route.getRouteNo()) {
+                if (originRouteNo == route.getRouteNo()) {
                     continue;
                 }
 
                 // Compare with nearbyDestinations
                 for (GeoResult<RedisGeoCommands.GeoLocation<Object>> destinationResult : nearbyDestinations) {
                     RedisGeoCommands.GeoLocation<Object> destinationLocation = destinationResult.getContent();
-                    int destinationName = (int) destinationLocation.getName();
+                    int destinationRouteNo = (int) destinationLocation.getName();
 
-                    if (originName == destinationName) {
+                    if (originRouteNo == destinationRouteNo) {
                         // Match found, return the matching location
-                        Routes routesA = routeService.findByRoutesByRouteNo(originName);
+                        Routes routesA = routeService.findByRoutesByRouteNo(originRouteNo);
                         Routes routesB = routeService.findByRoutesByRouteNo(route.getRouteNo());
                         matchingService.notifyMatchingSuccess(routesA.getRtUserNo(),routesB.getRtUserNo());
                     }
@@ -194,45 +184,6 @@ public class MapService {
         return redisTemplate.opsForGeo().radius("route:destination", searchArea, args);
     }
 
-    public Optional<Object> findMatchingUser(double originLongitude, double originLatitude,
-                                             double destinationLongitude, double destinationLatitude,
-                                             double radiusInMeters) {
-        // 1. 출발지에서 반경 내 사용자 검색
-        Circle originSearchArea = new Circle(new Point(originLongitude, originLatitude), new Distance(radiusInMeters, Metrics.METERS));
-        RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
-                .includeDistance()
-                .sortAscending(); // 가까운 순으로 정렬
-
-        GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyOrigins = redisTemplate.opsForGeo().radius("route:origin", originSearchArea, args);
-
-        if (nearbyOrigins != null) {
-            // 2. 검색된 사용자 중 도착지 조건 검증
-            for (GeoResult<RedisGeoCommands.GeoLocation<Object>> originResult : nearbyOrigins) {
-                Object userId = originResult.getContent().getName();
-
-                // 2-1. 사용자 도착지의 좌표를 Redis에서 가져옴
-                List<Point> destinationPoints = redisTemplate.opsForGeo().position("route:destination", userId);
-                if (destinationPoints != null && !destinationPoints.isEmpty()) {
-                    Point userDestinationPoint = destinationPoints.get(0);
-
-                    // 2-2. 도착지 반경 검증
-                    Distance destinationDistance = redisTemplate.opsForGeo().distance(
-                            "route:destination",
-                            new Point(destinationLongitude, destinationLatitude),
-                            userDestinationPoint
-                    );
-
-                    if (destinationDistance != null && destinationDistance.getValue() <= radiusInMeters) {
-                        // 조건을 만족하는 첫 번째 사용자 반환
-                        return Optional.of(userId);
-                    }
-                }
-            }
-        }
-
-        // 조건을 만족하는 사용자가 없는 경우
-        return Optional.empty();
-    }
 
 //    public String routeWithWaypoints(Routes route) {
 //        // 헤더 설정

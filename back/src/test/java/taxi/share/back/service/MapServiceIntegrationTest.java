@@ -14,20 +14,11 @@ public class MapServiceIntegrationTest {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    private RedisService redisService;
-    @Autowired
     private MapService mapService;
 
     @BeforeEach
     public void setup() {
         // Initialize mocks if necessary
-    }
-
-    @Test
-    public void testCheckRoute() {
-        boolean result = mapService.checkRoute("routeCache::15");
-        // 결과 검증
-        assertEquals(true, result);
     }
 
 }

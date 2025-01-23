@@ -76,7 +76,7 @@ public class Routes implements Serializable {
 
     @Transient
     @Column(nullable = false)
-    @Schema(description = "0:경로 찾는중, 1:share잡는중, 2:share잡음, 3:도착, 4:결제완료", example = "0")
+    @Schema(description = "0:share찾는중, 1:share대기, 2:share잡음, 3:도착, 4:결제완료", example = "0")
     private int status;
 
     @Column(nullable = false)
